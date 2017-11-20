@@ -70,6 +70,9 @@ public class AlertRecordContainer {
             record1 = record2;
             record1.setTimes(record1.getTimes() + 1);
             record1.setLastReceiveTime(new Date().getTime()/1000);
+        } else if (record1.getEndsAt() > record1.getStartsAt()){
+            //如果有结束时间，而缓存中没有，表示已经转储的记录，不需要重新处理，这些记录会被忽略掉
+            return record1;
         }else{
             records.put(record1.getId(),record1);
         }

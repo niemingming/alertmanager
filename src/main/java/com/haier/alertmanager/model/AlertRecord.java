@@ -192,7 +192,7 @@ public class AlertRecord {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance(AlertConstVariable.ALERT_ID_ALG);
             //ES不支持大写字母，统一双方字符
-            setId(HexBin.encode(messageDigest.digest(sortLabels.getBytes("UTF-8"))).toLowerCase());
+            setId(HexBin.encode(messageDigest.digest(sortLabels.getBytes("UTF-8"))));
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             System.out.println("系统不支持配置的计算算法");

@@ -25,5 +25,7 @@ alertmanager:
     datepattern: yyyyMM
     #es的类型
     type: HISTORY
+    #index的前缀
+    indexpre: alert-
   #notifyService endpoint
   notifyUrl: http://localhost:9000

@@ -10,6 +10,7 @@ import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseListener;
 import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,9 @@ public class ESNotifyStorageHandler implements INotifyStorageHandler {
     private AlertConfigurationProp alertConfigurationProp;
     @Autowired
     private MongoTemplate mongoTemplate;
+    /*index的前缀*/
+    @Value("${alertmanager.elasticsearch.indexpre}")
+    private String indexpre;
     /*日志处理服务*/
     @Autowired
     private LogService logService;
@@ -61,7 +65,7 @@ public class ESNotifyStorageHandler implements INotifyStorageHandler {
         Map params = new HashMap();
         String dateformat = simpleDateFormat.format(new Date());
         //计算ES数据索引,ESid必须是小写字母
-        String index = record.getId().toLowerCase() + dateformat;
+        String index = indexpre + dateformat;
         Gson requestBody = new Gson();
         //ES数据内容，id作为ES关键字不能再数据体中出现
         Map bodymap = record.toSql().toMap();
