@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: alertmanager
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/alertmanager
+server:
+  port: 8081
+#告警相关表明配置
+alertmanager:
+#告警记录表明
+  alertrecord:
+    tablename: alertRecord
+  #告警字典表名
+  alertdictionary:
+    tablename: alertDictionary
+  #通知白名单表名
+  alertexcluse:
+    tablename: alertExcluse
+  #ES主机和端口配置
+  elasticsearch:
+    hostname: localhost
+    port: 9200
+    #索引的时间格式
+    datepattern: yyyyMM
+    #es的类型
+    type: HISTORY
+  #notifyService endpoint
+  notifyUrl: http://localhost:9000
