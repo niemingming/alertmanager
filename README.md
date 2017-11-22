@@ -268,6 +268,47 @@ GET /queryAlertingById/{id}//id为记录id
       hint:string //服务器返回的提示信息，一般在访问失败时给出。
  }
  ```
- 示例（待补充）
+ 我们使用httpclient模拟GET请求，查询指定id的历史数据详情，代码如下：
+ 
+ ```
+  HttpClient client = HttpClients.createDefault();
+  HttpGet get = 
+     new HttpGet("http://localhost:8081/api/queryHistoryById/alert-201711/247D78214DCCD7FE830EC039F2B310C4-1511320572");
+  HttpResponse response = client.execute(get);
+  HttpEntity res = response.getEntity();
+  System.out.println(EntityUtils.toString(res));
+ ```
+ 以上代码等价于：
+ 
+ ```
+ GET /api/queryHistoryById/alert-201711/247D78214DCCD7FE830EC039F2B310C4-1511320572
+ ```
+ 返回的数据格式为：
+ 
+ ```
+ {
+  "success":true,
+  "code":0,
+  "total":1,
+  "data":{
+   "startsAt":1.511320572E9,
+   "endsAt":1.511330962E9,
+   "lastNotifyTime":1.511330952E9,
+   "lastReceiveTime":1.511330962E9,
+   "times":196.0,
+   "status":"resolve",
+   "labels":{
+     "alertname":"mymetric11",
+     "group":"my1",
+     "instance":"localhost:8080",
+     "job":"tomcat",
+     "monitor":"codelab-monitor",
+     "project":"project1"
+   },
+  "_index":"alert-201711",
+  "_id":"247D78214DCCD7FE830EC039F2B310C4-1511320572"
+ }
+}
+ ```
 <h3 id="2">2.系统配置</h3>
 <h4 id="2.1">2.1配置信息刷新</h4>
