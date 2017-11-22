@@ -189,7 +189,68 @@ POST /api/queryAlertList
       hint:string //服务器返回的提示信息，一般在访问失败时给出。
  }
  ```
- 示例（待补充）
+ 以下示例使用httpClient实现，查询times>10的历史记录，采用分页查询，查第一页数据。代码如下：
+ 
+ ```
+ HttpClient client = HttpClients.createDefault();
+ HttpPost post = new HttpPost("http://localhost:8081/api/queryHistoryList");
+ //不分页查询，列表查询为POST请求方式，条件为project=
+ StringBuilder stringBuilder = new StringBuilder();
+ stringBuilder.append("{")
+              .append("   pageinfo:{from:0,size:1},")
+              .append("  query:{")
+              .append("   times:{$gt:10}")
+              .append("  }")
+              .append("}");
+ StringEntity stringEntity = new StringEntity(stringBuilder.toString());
+ post.setEntity(stringEntity);
+ HttpResponse response = client.execute(post);
+ HttpEntity res = response.getEntity();
+ System.out.println(EntityUtils.toString(res));
+ ```
+ 以上代码等价于如下请求体：
+ 
+ ```
+ POST /api/queryHistoryList
+ {
+  pageinfo:{
+   from:0,
+   size:1
+  },
+  query:{
+   times:{$gt:10}
+  }
+ }
+ ```
+ 返回结果为：
+ 
+ ```
+ {
+  "success":true,
+  "code":0,
+  "total":27,
+  "data": [
+   {
+    "startsAt":1.511320572E9,
+    "endsAt":1.511330962E9,
+    "lastNotifyTime":1.511330952E9,
+    "lastReceiveTime":1.511330962E9,
+    "times":196.0,
+    "status":"resolve",
+    "labels":{
+      "alertname":"mymetric11",
+      "group":"my1",
+      "instance":"localhost:8080",
+      "job":"tomcat",
+      "monitor":"codelab-monitor",
+      "project":"project1"
+     },
+    "_index":"alert-201711",
+    "_id":"247D78214DCCD7FE830EC039F2B310C4-1511320572"
+   }
+ ]
+}
+ ```
 <h5 id="1.2.2">1.2.2.历史告警详情查询</h5>
 查询格式
 
