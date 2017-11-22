@@ -19,7 +19,7 @@
 </br>查询格式
 
 ```
-POST /queryAlertList
+POST /api/queryAlertingList
 {
      pageinfo:{//分页信息如果不传，表示不分页
          from:10, //从第几条开始，默认是0
@@ -43,14 +43,69 @@ POST /queryAlertList
       hint:string //服务器返回的提示信息，一般在访问失败时给出。
  }
  ```
- 示例（待补充）
+ 我们用httpClient来模拟post请求，尝试查询project=project1的数据。具体请求代码如下：
  
+ ```
+ HttpClient client = HttpClients.createDefault();
+ HttpPost post = new HttpPost("http://localhost:8081/api/queryAlertingList");
+ //不分页查询，列表查询为POST请求方式，条件为project=
+ StringBuilder stringBuilder = new StringBuilder();
+ stringBuilder.append("{")
+              .append("  query:{")
+              .append("   \"labels.project\":\"project1\"")
+              .append("  }")
+              .append("}");
+ StringEntity stringEntity = new StringEntity(stringBuilder.toString());
+ post.setEntity(stringEntity);
+ HttpResponse response = client.execute(post);
+ HttpEntity res = response.getEntity();
+ System.out.println(EntityUtils.toString(res));
+ ```
+ 
+上面例子,就是查询project为project1的数据，等价于:
+
+```
+POST /api/queryAlertingList
+{
+  query:{
+    "labels.project":"project1"
+  }
+}
+```
+返回的数据格式为：
+
+```
+{
+ "success":true,
+ "code":0,
+ "total":1,
+ "data": [
+  {
+   "_id":"247D78214DCCD7FE830EC039F2B310C4",
+   "startsAt":1511320572,
+   "endsAt":-62135798400,
+   "lastNotifyTime":1511321273,
+   "lastReceiveTime":1511321307,
+   "times":8,
+   "status":"firing",
+     "labels":{
+       "alertname":"mymetric11",
+       "group":"my1",
+       "instance":"localhost:8080",
+       "job":"tomcat",
+       "monitor":"codelab-monitor",
+       "project":"project1"
+     }
+   }
+  ]
+}
+```
 <h5 id="1.1.2">1.1.2.告警详情查询</h5>
 根据记录id查询当前告警详情。具体格式如下：
 </br>查询格式
 
 ```
-GET /queryAlertingById/{id}//id为记录id
+GET /api/queryAlertingById/{id}//id为记录id
 ```
  返回数据格式
  
@@ -70,7 +125,7 @@ GET /queryAlertingById/{id}//id为记录id
 查询格式
 
 ```
-POST /queryAlertList
+POST /api/queryAlertList
 {
      pageinfo:{//分页信息如果不传，表示不分页
          from:10, //从第几条开始，默认是0
