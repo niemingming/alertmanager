@@ -118,7 +118,47 @@ GET /api/queryAlertingById/{id}//id为记录id
       hint:string //服务器返回的提示信息，一般在访问失败时给出。
  }
  ```
- 示例（待补充）
+我们用httpClient来模拟GET请求，查询具体某一条告警信息详情,我们查询id为：247D78214DCCD7FE830EC039F2B310C4，代码如下：
+
+```
+HttpClient client = HttpClients.createDefault();
+HttpGet get = new HttpGet("http://localhost:8081/api/queryAlertingById/247D78214DCCD7FE830EC039F2B310C4");
+HttpResponse response = client.execute(get);
+HttpEntity res = response.getEntity();
+System.out.println(EntityUtils.toString(res));
+```
+上面代码等价于：
+
+```
+GET /api/queryAlertingById/247D78214DCCD7FE830EC039F2B310C4
+```
+返回的数据格式：
+
+```
+{
+ "success":true,
+ "code":0,
+ "total":1,
+ "data": {
+  "_id":"247D78214DCCD7FE830EC039F2B310C4",
+  "startsAt":1511320572,
+  "endsAt":-62135798400,
+  "lastNotifyTime":1511322357,
+  "lastReceiveTime":1511322362,
+  "times":219,
+  "status":"firing",
+  "labels":{
+   "alertname":"mymetric11",
+   "group":"my1",
+   "instance":"localhost:8080",
+   "job":"tomcat",
+   "monitor":"codelab-monitor",
+   "project":"project1"
+  }
+ }
+}
+```
+
 <h4 id="1.2">1.2历史告警查询</h4>
 历史告警信息查询，按照统一性原则，与当前告警查询格式一致，只不过数据来源有区别。当前告警数据来源于MongoDB数据库，历史告警数据来源于ElasticSearch。
 <h5 id="1.2.1">1.2.1.历史告警列表查询</h5>
