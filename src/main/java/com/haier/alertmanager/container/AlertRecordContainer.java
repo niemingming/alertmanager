@@ -7,14 +7,12 @@ import com.haier.alertmanager.service.HistoryStoreService;
 import com.haier.alertmanager.service.NotifySendService;
 import com.mongodb.DBCursor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

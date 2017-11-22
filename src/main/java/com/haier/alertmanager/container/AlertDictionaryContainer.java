@@ -1,6 +1,5 @@
 package com.haier.alertmanager.container;
 
-import com.google.gson.Gson;
 import com.haier.alertmanager.configuration.AlertConfigurationProp;
 import com.haier.alertmanager.model.AlertDictionary;
 import com.haier.alertmanager.model.AlertRecord;
@@ -8,7 +7,6 @@ import com.haier.alertmanager.template.SimpleTemplate;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 

@@ -5,7 +5,6 @@ import com.haier.alertmanager.configuration.AlertConfigurationProp;
 import com.haier.alertmanager.container.AlertDictionaryContainer;
 import com.haier.alertmanager.container.AlertExcluseContainer;
 import com.haier.alertmanager.container.MessageReceiverContainer;
-import com.haier.alertmanager.model.AlertRecord;
 import com.haier.alertmanager.model.ApiResult;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;

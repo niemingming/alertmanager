@@ -3,7 +3,6 @@ package com.haier.alertmanager.service;
 import com.haier.alertmanager.model.AlertRecord;
 import com.haier.alertmanager.notifyhandlers.INotifyStorageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 

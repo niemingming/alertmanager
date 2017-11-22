@@ -8,7 +8,6 @@ import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
