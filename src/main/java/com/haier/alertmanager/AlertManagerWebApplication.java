@@ -3,6 +3,7 @@ package com.haier.alertmanager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @description alertmanager的启动类
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
  * @author Niemingming
  */
 @SpringBootApplication
+@EnableScheduling
 @ComponentScan("com.haier.alertmanager")
 public class AlertManagerWebApplication {
 

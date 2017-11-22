@@ -1,0 +1,6 @@
+{"index":{"_index":"alert-201711","_type":"HISTORY","_id":"95584fa50534b83937ebb01c914582561511154872"}}
+{"startsAt":1511154872,"endsAt":1511169716,"lastNotifyTime":1511154877,"lastReceiveTime":1511169726,"times":2750,"status":"resolve","alertname":"mymetric11","app":"project2","group":"my1","instance":"localhost:8080","job":"tomcat","monitor":"codelab-monitor"}
+{"index":{"_index":"alert-201711","_type":"HISTORY","_id":"e5352b65ba9ffb8d9d5f731107038afa1511236422"}}
+{"startsAt":1511236422,"endsAt":1511236667,"lastNotifyTime":1511236689,"lastReceiveTime":1511236690,"times":54,"status":"resolve","alertname":"mymetric11","app":"project1","group":"my1","instance":"localhost:8080","job":"tomcat","monitor":"codelab-monitor"}
+{"index":{"_index":"alert-201711","_type":"HISTORY","_id":"e5352b65ba9ffb8d9d5f731107038afa1511242907"}}
+{"startsAt":1511242907,"endsAt":1511243507,"lastNotifyTime":1511243507,"lastReceiveTime":1511243507,"times":120,"status":"resolve","alertname":"mymetric11","app":"project1","group":"my1","instance":"localhost:8080","job":"tomcat","monitor":"codelab-monitor"}

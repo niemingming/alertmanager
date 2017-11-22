@@ -12,6 +12,7 @@ import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
@@ -35,9 +36,7 @@ public class ESNotifyStorageHandler implements INotifyStorageHandler {
     private AlertConfigurationProp alertConfigurationProp;
     @Autowired
     private MongoTemplate mongoTemplate;
-    /*index的前缀*/
-    @Value("${alertmanager.elasticsearch.indexpre}")
-    private String indexpre;
+
     /*日志处理服务*/
     @Autowired
     private LogService logService;
@@ -59,21 +58,26 @@ public class ESNotifyStorageHandler implements INotifyStorageHandler {
     @Override
     public void saveRecord(AlertRecord record) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(alertConfigurationProp.esDataPattern);
+        HttpHost[] hosts = new HttpHost[alertConfigurationProp.esHostNames.size()];
+        for (int i = 0; i < hosts.length; i++ ){
+            hosts[i] = HttpHost.create(alertConfigurationProp.esHostNames.get(i));
+        }
         //创建ES请求客户端
-        RestClient restClient = RestClient.builder(new HttpHost(alertConfigurationProp.esHostName,alertConfigurationProp.esPort)).build();
+        RestClient restClient = RestClient.builder(hosts).build();
         //请求参数
         Map params = new HashMap();
         String dateformat = simpleDateFormat.format(new Date());
         //计算ES数据索引,ESid必须是小写字母
-        String index = indexpre + dateformat;
+        String index = alertConfigurationProp.indexpre + dateformat;
         Gson requestBody = new Gson();
         //ES数据内容，id作为ES关键字不能再数据体中出现
         Map bodymap = record.toSql().toMap();
         bodymap.remove("_id");
+        bodymap.remove("alertId");//删除告警id，该值作为ESid使用
 
         String body = requestBody.toJson(bodymap);
         //获取ES数据id
-        String id = record.getId().toLowerCase()+record.getStartsAt();
+        String id = record.getAlertId();
         //获取ES保存接口endpoint
         String endpoint = "/" + index + "/" + alertConfigurationProp.esType + "/" + id;
         try {

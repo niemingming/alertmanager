@@ -30,6 +30,7 @@ public class MongoDBTest {
         DBObject query = new BasicDBObject();
         query.put("_id",10);
         mongoTemplate.getCollection(colname).update(query,object,true,false);
+        mongoTemplate.getCollection(colname).count();
         return "success";
     }
 }

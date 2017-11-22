@@ -21,6 +21,8 @@ import java.util.*;
 public class AlertRecord {
     /*系统编码，根据labels生成的md5码，也是告警信息的唯一标识*/
     private String id;
+    /*告警id与ESId相对应*/
+    private String alertId;
     /*告警名称*/
     private String alertname;
     /*告警开始时间*/
@@ -37,6 +39,8 @@ public class AlertRecord {
     private String sortLabels;
     /**告警状态*/
     private String status;
+    /*告警级别*/
+    private String level;
     /**接收通知次数*/
     private int times = 0;
     /**通知消息*/
@@ -54,6 +58,13 @@ public class AlertRecord {
      * @author Niemingming
      */
     public AlertRecord(Map record){
+        //处理告警开始时间、结束时间和接收时间
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(AlertConstVariable.ALERT_TIME_PATTERN);
+        startsAt = getAlertTime(record,"startsAt",simpleDateFormat);
+        endsAt = getAlertTime(record,"endsAt",simpleDateFormat);
+        lastReceiveTime = new Date().getTime()/1000;//精确到秒
+        times = 1;
+        status = AlertConstVariable.ALERT_STATUS_FIRING;//告警状态为触发状态
         Map labels = record.get("labels") == null ? null : (Map) record.get("labels");
         if (labels == null){
             System.out.println("未找到告警信息的【lables】标识，无法初始化");
@@ -62,13 +73,6 @@ public class AlertRecord {
             setAlertname(alertname);
             setLabels(labels);
         }
-        //处理告警开始时间、结束时间和接收时间
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(AlertConstVariable.ALERT_TIME_PATTERN);
-        startsAt = getAlertTime(record,"startsAt",simpleDateFormat);
-        endsAt = getAlertTime(record,"endsAt",simpleDateFormat);
-        lastReceiveTime = new Date().getTime()/1000;//精确到秒
-        times = 1;
-        status = AlertConstVariable.ALERT_STATUS_FIRING;//告警状态为触发状态
     }
     /**
      * @description 获取指定的告警时间
@@ -106,8 +110,9 @@ public class AlertRecord {
         lastNotifyTime = record.get("lastNotifyTime") == null ? 0l :(Long) record.removeField("lastNotifyTime");
         times = record.get("times") == null ? 0 :(Integer) record.removeField("times");
         status = record.removeField("status")+"";
+        alertId = record.removeField("alertId")+"";
         //形成labels字段，并计算id
-        setLabels(record.toMap());
+        setLabels(record.get("labels") == null ? new HashMap() : (Map) record.get("labels"));
         id = mid;
     }
 
@@ -117,6 +122,7 @@ public class AlertRecord {
 
     public void setId(String id) {
         this.id = id;
+        setAlertId(id + "-" + startsAt);
     }
 
     public String getAlertname() {
@@ -234,6 +240,22 @@ public class AlertRecord {
         this.message = message;
     }
 
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public String getAlertId() {
+        return alertId;
+    }
+
+    public void setAlertId(String alertId) {
+        this.alertId = alertId;
+    }
+
     /**
      * @description 将属性值转为插入数据
      * @date 2017/11/16
@@ -248,7 +270,9 @@ public class AlertRecord {
         object.put("lastReceiveTime",lastReceiveTime);
         object.put("times",times);
         object.put("status",status);
-        object.putAll(getLabels());
+        object.put("level",level);
+        object.put("alertId",alertId);
+        object.put("labels",this.labels);
         return object;
     }
     /**
@@ -262,7 +286,6 @@ public class AlertRecord {
         object.put("endsAt",new Date(this.endsAt*1000));
         object.put("lastNotifyTime",new Date(this.lastNotifyTime*1000));
         object.put("lastReceiveTime",new Date(this.lastReceiveTime*1000));
-        object.put("labels",this.labels);
         return  object.toMap();
     }
     /**
@@ -291,6 +314,8 @@ public class AlertRecord {
                 ", lastNotifyTime=" + lastNotifyTime +
                 ", lastReceiveTime=" + lastReceiveTime +
                 ", labels=" + labels +
+                ",level=" + level +
+                ",alertId=" + alertId +
                 '}';
     }
 }

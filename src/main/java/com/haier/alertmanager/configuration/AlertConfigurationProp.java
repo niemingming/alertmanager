@@ -1,7 +1,11 @@
 package com.haier.alertmanager.configuration;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.List;
 
 /**
  * @description 告警通知应用所有的配置信息
@@ -20,16 +24,24 @@ public class AlertConfigurationProp {
     @Value("${alertmanager.alertdictionary.tablename}")
     public String alertDictionaryTableName;
     /*转储ES配置信息*/
-    @Value("${alertmanager.elasticsearch.hostname}")
-    public String esHostName;
-    /*转储ES端口*/
-    @Value("${alertmanager.elasticsearch.port}")
-    public int esPort;
+    public List<String> esHostNames;
     /*转储ES的索引日期格式*/
-    @Value("${alertmanager.elasticsearch.datepattern}")
     public String esDataPattern;
     /*转储ES的类型名称*/
-    @Value("${alertmanager.elasticsearch.type}")
     public String esType;
+    /*告警信息重发间隔设置*/
+    @Value("${alertmanager.resendinterval}")
+    public String resendinterval;
+    /*index的前缀*/
+    public String indexpre;
+    @Autowired
+    private ElasticsearchConfiguration elasticsearchConfiguration;
+    @PostConstruct
+    public void init(){
+        this.esHostNames = elasticsearchConfiguration.getHostnames();
+        this.esDataPattern = elasticsearchConfiguration.getDatepattern();
+        this.esType = elasticsearchConfiguration.getType();
+        this.indexpre = elasticsearchConfiguration.getIndexpre();
+    }
 
 }

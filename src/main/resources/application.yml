@@ -17,10 +17,12 @@ alertmanager:
   #通知白名单表名
   alertexcluse:
     tablename: alertExcluse
+  #消息重发间隔时长单位为s:秒，m:分，h:时，d：天
+  resendinterval: 2m
   #ES主机和端口配置
   elasticsearch:
-    hostname: localhost
-    port: 9200
+  #ES的主机端口配置，支持多台主机,
+    hostnames: ['localhost:9200']
     #索引的时间格式
     datepattern: yyyyMM
     #es的类型

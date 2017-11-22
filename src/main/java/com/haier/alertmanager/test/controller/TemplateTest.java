@@ -1,9 +1,13 @@
 package com.haier.alertmanager.test.controller;
 
 import com.haier.alertmanager.template.SimpleTemplate;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -17,7 +21,7 @@ import java.util.regex.Pattern;
 public class TemplateTest {
 
     public static void main(String[]args) throws ParseException, IOException {
-        String str = "我们走在${labels}asdfa上，${labels.name}天涯${fff}";
+//        String str = "我们走在${labels}asdfa上，${labels.name}天涯${fff}";
 //        Pattern pattern = Pattern.compile("\\$\\{\\w+(\\.\\w+)*\\}");
 //        System.out.println(pattern.pattern());
 //        String [] strs = pattern.split(str);
@@ -44,9 +48,14 @@ public class TemplateTest {
 //        str = "2017-11-09 23:24:42.806";
 //        sdf.parse(str);
 
-        FileWriter fw = new FileWriter("/errorrecord.log",true);
-        fw.write("第二行");
-        fw.write("\r\n");
-        fw.close();
+//        FileWriter fw = new FileWriter("/errorrecord.log",true);
+//        fw.write("第二行");
+//        fw.write("\r\n");
+//        fw.close();
+        DefaultResourceLoader defaultResourceLoader = new DefaultResourceLoader();
+        Resource resource = defaultResourceLoader.getResource("classpath:notifysend/personlist.txt");
+
+         System.out.println(resource.getFile());
+
     }
 }

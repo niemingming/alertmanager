@@ -68,7 +68,7 @@ public class AlertExcluseContainer {
      */
     public boolean inExcluseList(AlertRecord record){
         boolean flag = false;//不在白名单中
-        Map map = record.toMap();
+        Map map = record.getLabels();//通过labels中属性做出判断
         long now = new Date().getTime()/1000;
         for (AlertExcluse excluse:alertExcluses){
             //当前时间在白名单范围内且过滤条件吻合

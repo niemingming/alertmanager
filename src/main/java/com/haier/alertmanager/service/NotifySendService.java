@@ -5,9 +5,9 @@ import com.haier.alertmanager.container.AlertExcluseContainer;
 import com.haier.alertmanager.model.AlertRecord;
 import com.haier.alertmanager.notifyhandlers.INotifySendHanlder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,8 +17,7 @@ import java.util.List;
  */
 @Service
 public class NotifySendService {
-    @Value("${alertmanager.notifyUrl}")
-    private String notifyUrl;
+
     /*白名单列表*/
     @Autowired
     private AlertExcluseContainer alertExcluseContainer;
@@ -29,13 +28,17 @@ public class NotifySendService {
     @Autowired
     private AlertDictionaryContainer alertDictionaryContainer;
 
+
+
+
     /**
      * @description 发送通知消息
      * @date 2017/11/16
      * @author Niemingming
      */
     public  void sendNotify(AlertRecord record){
-        //如果不在白名单列表中，就发送通知
+
+        //如果不在白名单列表中，发送通知。
         if (!alertExcluseContainer.inExcluseList(record)){
             String message = alertDictionaryContainer.getNotifyMessage(record);
             record.setMessage(message);
@@ -46,7 +49,6 @@ public class NotifySendService {
                     break;
                 }
             }
-
         }
     }
 }

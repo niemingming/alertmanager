@@ -81,6 +81,22 @@ public class AlertDictionaryContainer {
         return simpleTemplate.decodeTemplate(templateStr.toString(),record.toMap());
     }
     /**
+     * @description 设置告警的级别
+     * @date 2017/11/21
+     * @author Niemingming
+     */
+    public void setAlertLevel(AlertRecord record) {
+        String alertname = record.getAlertname();
+        AlertDictionary alertDictionary = alertDictionaryMap.get(alertname);
+        //未查询到告警配置信息
+        if (alertDictionary == null){
+            System.out.println("未能查询到【" + alertname + "】的告警数据字典");
+            return;
+        }
+        record.setLevel(alertDictionary.getAlertlevel());
+    }
+
+    /**
      * @description 刷新配置信息
      * @date 2017/11/17
      * @author Niemingming

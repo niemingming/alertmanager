@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -74,6 +75,7 @@ public class AlertRecordContainer {
             //如果有结束时间，而缓存中没有，表示已经转储的记录，不需要重新处理，这些记录会被忽略掉
             return record1;
         }else{
+
             records.put(record1.getId(),record1);
         }
         //更新或者插入告警记录
@@ -94,5 +96,13 @@ public class AlertRecordContainer {
      */
     public void updateRecord(AlertRecord record){
         mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).update(record.toQuerySqlById(),record.toSql(),true,false);
+    }
+    /**
+     * @description 获取所有当前告警记录
+     * @date 2017/11/20
+     * @author Niemingming
+     */
+    public Map<String,AlertRecord> getRecords(){
+        return this.records;
     }
 }
