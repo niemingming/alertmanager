@@ -7,6 +7,7 @@
   * [1.2.历史告警查询](#1.2)
     * [1.2.1.历史告警列表查询](#1.2.1)
     * [1.2.2.历史告警详情查询](#1.2.2)
+    * [1.2.3.历史告警搜索](#1.2.3)
 * [2.系统配置](#2)
   * [2.1.配置信息刷新](#2.1)
   
@@ -310,5 +311,66 @@ GET /queryAlertingById/{id}//id为记录id
  }
 }
  ```
+ <h5 id="1.2.3">1.2.3.历史告警搜索</h5>
+ 历史告警搜索是指，根据输入的关键字查询与之相关的历史告警数据，返回符合条件的前10条记录。访问的数据格式为：
+ 
+ ```
+ GET /api/searchHistoryList/{searchstr}
+ ```
+ 返回的数据格式为：
+ 
+ ```
+ {
+      success:bool(true/false),//表示是否成功
+      code:0/1 ,//执行结果编码，目前只有0成功，1失败
+      total:long,//表示查询到的记录数
+      data:[], //表示返回的记录列表详情
+      hint:string //服务器返回的提示信息，一般在访问失败时给出。
+ }
+ ```
+ 我们用HTTPClient来模拟GET请求，查询包含tomcat字符串的记录：
+ 
+ ```
+ HttpClient client = HttpClients.createDefault();
+ HttpGet get = new HttpGet("http://localhost:8081/api/searchHistoryList/tomcat");
+ HttpResponse response = client.execute(get);
+ HttpEntity res = response.getEntity();
+ System.out.println(EntityUtils.toString(res));
+ ```
+ 以上代码等价于：
+ 
+ ```
+ GET /api/searchHistoryList/tomcat
+ ```
+ 返回的数据格式为：
+ 
+ ```
+ {
+  "success":true,
+  "code":0,
+  "total":42,
+  "data":[
+   {
+    "startsAt":1.511320572E9,
+    "endsAt":1.511330962E9,
+    "lastNotifyTime":1.511330952E9,
+    "lastReceiveTime":1.511330962E9,
+    "times":196.0,
+    "status":"resolve",
+    "labels":{
+      "alertname":"mymetric11",
+      "group":"my1",
+      "instance":"localhost:8080",
+      "job":"tomcat",
+      "monitor":"codelab-monitor",
+      "project":"project1"
+    },
+   "_index":"alert-201711",
+   "_id":"247D78214DCCD7FE830EC039F2B310C4-1511320572"
+  },
+  ···
+ ]
+}
+```
 <h3 id="2">2.系统配置</h3>
 <h4 id="2.1">2.1配置信息刷新</h4>
