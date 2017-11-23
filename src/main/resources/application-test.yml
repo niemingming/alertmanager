@@ -1,0 +1,34 @@
+#测试文件
+spring:
+  application:
+    name: alertmanager
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/alertmanager
+server:
+  port: 8080
+#告警相关表明配置
+alertmanager:
+#告警记录表明
+  alertrecord:
+    tablename: alertRecord
+  #告警字典表名
+  alertdictionary:
+    tablename: alertDictionary
+  #通知白名单表名
+  alertexcluse:
+    tablename: alertExcluse
+  #消息重发间隔时长单位为s:秒，m:分，h:时，d：天
+  resendinterval: 2m
+  #ES主机和端口配置
+  elasticsearch:
+  #ES的主机端口配置，支持多台主机,
+    hostnames: ['10.138.16.188:9200','10.138.16.189:9200','10.138.16.190:9200']
+    #索引的时间格式
+    datepattern: yyyyMM
+    #es的类型
+    type: HISTORY
+    #index的前缀
+    indexpre: alert-
+  #notifyService endpoint
+  notifyUrl: http://localhost:9000
