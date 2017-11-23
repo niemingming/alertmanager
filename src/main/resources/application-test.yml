@@ -4,7 +4,7 @@ spring:
     name: alertmanager
   data:
     mongodb:
-      uri: mongodb://localhost:27017/alertmanager
+      uri: mongodb://10.138.40.221:27018/alert
 server:
   port: 8080
 #告警相关表明配置
@@ -19,7 +19,7 @@ alertmanager:
   alertexcluse:
     tablename: alertExcluse
   #消息重发间隔时长单位为s:秒，m:分，h:时，d：天
-  resendinterval: 2m
+  resendinterval: 3d
   #ES主机和端口配置
   elasticsearch:
   #ES的主机端口配置，支持多台主机,
