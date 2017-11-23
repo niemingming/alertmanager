@@ -34,6 +34,9 @@ public class AlertConfigurationProp {
     public String resendinterval;
     /*index的前缀*/
     public String indexpre;
+    /*ES配置文件地址*/
+    public String esTemplateAddress;
+
     @Autowired
     private ElasticsearchConfiguration elasticsearchConfiguration;
     @PostConstruct
@@ -42,6 +45,7 @@ public class AlertConfigurationProp {
         this.esDataPattern = elasticsearchConfiguration.getDatepattern();
         this.esType = elasticsearchConfiguration.getType();
         this.indexpre = elasticsearchConfiguration.getIndexpre();
+        this.esTemplateAddress = elasticsearchConfiguration.getTemplate();
     }
 
 }

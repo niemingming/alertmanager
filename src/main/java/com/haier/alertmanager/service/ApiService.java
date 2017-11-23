@@ -136,7 +136,22 @@ public class ApiService {
                             qcon.put(entry.getKey(),new BasicDBObject(range.getKey(),range.getValue().getAsString()));
                         }
                     }
-                }else {
+                }else if (entry.getValue().isJsonArray()){
+                    //如果是数组，表示in查询匹配多个
+                    Map containsCon = new HashMap();
+                    List values = new ArrayList();
+                    JsonArray jsonArray = entry.getValue().getAsJsonArray();
+                    for (int i = 0; i < jsonArray.size(); i++ ){
+                        JsonPrimitive jsonPrimitive = jsonArray.get(i).getAsJsonPrimitive();
+                        if (jsonPrimitive.isNumber()){
+                            values.add(jsonPrimitive.getAsDouble());
+                        }else {
+                            values.add(jsonPrimitive.getAsString());
+                        }
+                    }
+                    containsCon.put("$in",values);
+                    qcon.put(entry.getKey(),containsCon);
+                }else{
                     qcon.put(entry.getKey(),entry.getValue().getAsString());
                 }
             }
@@ -452,10 +467,10 @@ public class ApiService {
     public String initESMapping() {
         RestClient restClient = getRestClient();
         //采用通配符来设置映射
-        String endPoint = "/" + alertConfigurationProp.indexpre + "*/HISTORY/_mapping";
+        String endPoint = "/_template/alert_template";
         DefaultResourceLoader loader = new DefaultResourceLoader();
         try {
-            File file = loader.getResource(AlertConstVariable.ES_MAPPING_FILE).getFile();
+            File file = loader.getResource(alertConfigurationProp.esTemplateAddress).getFile();
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             StringBuilder mapping = new StringBuilder();
             String str = null;
@@ -466,11 +481,10 @@ public class ApiService {
                 }
                 mapping.append(str);
             }
-            System.out.println(mapping.toString());
             StringEntity entity = new StringEntity(mapping.toString(),"UTF-8");
             entity.setContentType("application/json;charset=UTF-8");
             Header header = new BasicHeader("content-type","application/json");
-            Response response = restClient.performRequest("POST",endPoint,new HashMap<String, String>(),entity,header);
+            Response response = restClient.performRequest("PUT",endPoint,new HashMap<String, String>(),entity,header);
             String result = EntityUtils.toString(response.getEntity());
             System.out.println(result);
         } catch (IOException e) {
@@ -530,6 +544,20 @@ public class ApiService {
                     Map range = new HashMap();
                     range.put("range",fieldr);
                     filters.add(range);
+                }else if (value instanceof JsonArray){
+                    //格式为{field:[value1,value2]}表示多个的值，为或的关系
+                    List terms = new ArrayList();
+                    JsonArray values = (JsonArray) value;
+                    for (int i = 0; i < values.size(); i++){
+                        JsonPrimitive jsonPrimitive = values.get(i).getAsJsonPrimitive();
+                        if (jsonPrimitive.isNumber()){
+                            terms.add(jsonPrimitive.getAsDouble());
+                        }else {
+                            terms.add(jsonPrimitive.getAsString());
+                        }
+                    }
+                    fieldr.put(field,terms);
+                    filters.add(new BasicDBObject("terms",fieldr).toMap());
                 }else if (value instanceof JsonPrimitive){//如果其他类型，表示是字符串,格式为{term:{field:value}}
                     fieldr.put(field,((JsonPrimitive)value).getAsString());
                     Map term = new HashMap();

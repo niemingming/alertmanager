@@ -6,12 +6,14 @@ import com.haier.alertmanager.configuration.AlertConstVariable;
 import com.haier.alertmanager.model.AlertRecord;
 import com.haier.alertmanager.service.HistoryStoreService;
 import com.haier.alertmanager.service.NotifySendService;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +43,7 @@ public class AlertRecordContainer {
      * @date 2017/11/16
      * @author Niemingming
      */
-    @PostConstruct
+//    @PostConstruct 不在读取缓存
     public void initMethod(){
         records = new HashMap<String, AlertRecord>();
         DBCursor cursor = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).find();
@@ -57,33 +59,32 @@ public class AlertRecordContainer {
      */
     public AlertRecord addRecord(JsonObject record){
         AlertRecord record1 = new AlertRecord(record);
-        AlertRecord record2 = records.get(record1.getId());
-        //判断缓存中是否存在，如果存在则更新接收次数和上次接收时间字段。
-        if (record2 != null){
-            if (record1.getEndsAt() > record2.getStartsAt()//有了结束时间，表示告警已经结束可以消缺了。
-                    ||record2.getEndsAt() > record2.getStartsAt()){//处理遗留数据
-                record2.setEndsAt(record1.getEndsAt());
-                record2.setStatus(AlertConstVariable.ALERT_STATUS_RESLOVE);
-                record2.setTimes(record2.getTimes() + 1);
-                record2.setLastReceiveTime(new Date().getTime()/1000);
-            }
-            record1 = record2;
-            record1.setTimes(record1.getTimes() + 1);
-            record1.setLastReceiveTime(new Date().getTime()/1000);
-        } else if (record1.getEndsAt() > record1.getStartsAt()){
-            //如果有结束时间，而缓存中没有，表示已经转储的记录，不需要重新处理，这些记录会被忽略掉
-            return record1;
-        }else{
-            records.put(record1.getId(),record1);
+        DBObject object = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).findOne(record1.toQuerySqlById());
+        boolean shouldexec = true;
+        if (record1.getEndsAt() > record1.getStartsAt()){
+            //如果有结束时间，则设置状态为已解决
+            record1.setStatus(AlertConstVariable.ALERT_STATUS_RESLOVE);
+            //如果数据库中有记录，表示第一次接收到消除请求，需要更新，且删除记录；否则表示已经处理过，后续不在处理。
+            shouldexec = object != null;
         }
-        //更新或者插入告警记录
-        mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).update(record1.toQuerySqlById(),record1.toSql(),true,false);
-        //出发消息发送事件
-        notifySendService.sendNotify(record1);
-        //判断是否结束，如果结束，需要放到历史数据中
-        if (AlertConstVariable.ALERT_STATUS_RESLOVE.equals(record1.getStatus())
-                && historyStoreService.storeHistoryRecord(record1)){
-           records.remove(record1.getId());//删除缓存中记录
+        if (object != null){
+            AlertRecord tmp = new AlertRecord(object);
+            record1.setLastNotifyTime(tmp.getLastNotifyTime());
+            record1.setTimes(tmp.getTimes()+1);
+            record1.setMessage(tmp.getMessage());
+        }
+        //如果没有结束时间，或者有但是需要更新时，执行更新操作。
+        if (shouldexec){
+            DBObject obj = record1.toSql();
+            BasicDBObject bb;
+            //更新或者插入告警记录
+            WriteResult writeResult = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).update(record1.toQuerySqlById(),obj,true,false);
+            //发送消息通知
+            notifySendService.sendNotify(record1);
+        }
+        //如果需要更新操作，且状态是解决，name就是第一次获取到解决数据，需要转储
+        if (shouldexec&&AlertConstVariable.ALERT_STATUS_RESLOVE.equals(record1.getStatus())){
+            historyStoreService.storeHistoryRecord(record1);//删除缓存中记录
         }
         return record1;
     }

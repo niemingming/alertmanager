@@ -21,6 +21,8 @@ public class ElasticsearchConfiguration {
     private String type;
     /*index的前缀*/
     private String indexpre;
+    /*模板配置文件地址*/
+    private String template;
 
     public List<String> getHostnames() {
         return hostnames;
@@ -51,5 +53,13 @@ public class ElasticsearchConfiguration {
 
     public void setIndexpre(String indexpre) {
         this.indexpre = indexpre;
+    }
+
+    public String getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(String template) {
+        this.template = template;
     }
 }

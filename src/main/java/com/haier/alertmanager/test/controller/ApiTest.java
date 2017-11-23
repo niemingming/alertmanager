@@ -38,8 +38,8 @@ public class ApiTest {
         stringBuilder.append("{")
                 .append("   pageinfo:{from:0,size:10},")
                 .append("  query:{")
-                .append(" \"labels.project\":\"project1\",")
-                .append("   \"times\":{$gt:3000}")
+                .append(" \"labels.project\":[\"project1\",\"project2\"],")
+                .append("   \"times\":{$gt:1}")
                 .append("  }")
                 .append("}");
         StringEntity stringEntity = new StringEntity(stringBuilder.toString());
@@ -65,7 +65,7 @@ public class ApiTest {
         stringBuilder.append("{")
                 .append("   pageinfo:{from:0,size:2},")
                 .append("  query:{")
-                .append("  \"labels.project\":\"project1\",")
+                .append("  \"labels.project\":[\"project1\",\"project2\"],")
                 .append("   times:{$gt:10}")
                 .append("  }")
                 .append("}");

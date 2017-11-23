@@ -1,0 +1,25 @@
+//index template
+{
+  "index_patterns":["alert-*"],
+  "settings":{
+    "number_of_shards":"3",
+    "number_of_replicas":"1",
+    "refresh_interval":"2s"
+  },
+  "mappings":{
+    "HISTORY":{
+      "properties":{
+        "startsAt":{"type":"date","format":"epoch_second"},
+        "endsAt":{"type":"date","format":"epoch_second"},
+        "lastNotifyTime":{"type":"date","format":"epoch_second"},
+        "lastReceiveTime":{"type":"date","format":"epoch_second"},
+        "times":{"type":"integer"},
+        "status":{"type":"keyword"},
+        "message":{"type":"text"},
+        "labels.*":{
+          "type":"keyword"
+        }
+      }
+    }
+  }
+}
