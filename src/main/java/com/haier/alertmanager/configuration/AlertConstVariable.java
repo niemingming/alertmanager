@@ -15,4 +15,6 @@ public interface AlertConstVariable {
     public static final String ALERT_STATUS_RESLOVE = "resolve";//解决状态
     /*人员配置路径*/
     public static final String MESSAGE_RECEIVER_LIST = "classpath:notifysend/personlist.list";
+    /*ESmapping文件路径*/
+    public static final String ES_MAPPING_FILE = "classpath:notifysend/esmapping.json";
 }

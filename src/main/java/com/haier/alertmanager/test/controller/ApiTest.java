@@ -1,5 +1,7 @@
 package com.haier.alertmanager.test.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -10,7 +12,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 /**
  * @description api服务调用测试
@@ -22,10 +23,12 @@ public class ApiTest {
     public static void main(String[]args) throws IOException {
 //        queryList();
 //        queryById();
-//        queryHistoryList();
+        queryHistoryList();
 //        queryHistoryById();
-        searchHistoryList();
+//        searchHistoryList();
+//        testgson();
     }
+
 
     public  static  void queryList() throws IOException {
         HttpClient client = HttpClients.createDefault();
@@ -35,7 +38,8 @@ public class ApiTest {
         stringBuilder.append("{")
                 .append("   pageinfo:{from:0,size:10},")
                 .append("  query:{")
-                .append("   \"labels.project\":\"project1\"")
+                .append(" \"labels.project\":\"project1\",")
+                .append("   \"times\":{$gt:3000}")
                 .append("  }")
                 .append("}");
         StringEntity stringEntity = new StringEntity(stringBuilder.toString());
@@ -59,12 +63,13 @@ public class ApiTest {
         //不分页查询，列表查询为POST请求方式，条件为project=
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{")
-                .append("   pageinfo:{from:0,size:1},")
+                .append("   pageinfo:{from:0,size:2},")
                 .append("  query:{")
+                .append("  \"labels.project\":\"project1\",")
                 .append("   times:{$gt:10}")
                 .append("  }")
                 .append("}");
-        StringEntity stringEntity = new StringEntity(stringBuilder.toString());
+        StringEntity stringEntity = new StringEntity(stringBuilder.toString(),"UTF-8");
         post.setEntity(stringEntity);
         HttpResponse response = client.execute(post);
         HttpEntity res = response.getEntity();
@@ -85,5 +90,11 @@ public class ApiTest {
         HttpResponse response = client.execute(get);
         HttpEntity res = response.getEntity();
         System.out.println(EntityUtils.toString(res));
+    }
+
+    public static  void testgson(){
+        Gson gson = new Gson();
+        JsonArray list= gson.fromJson("[1,2,3]", JsonArray.class);
+        System.out.println(list);
     }
 }

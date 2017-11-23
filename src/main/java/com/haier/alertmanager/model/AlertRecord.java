@@ -1,5 +1,8 @@
 package com.haier.alertmanager.model;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.haier.alertmanager.configuration.AlertConstVariable;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -56,7 +59,7 @@ public class AlertRecord {
      * @date 2017/11/16
      * @author Niemingming
      */
-    public AlertRecord(Map record){
+    public AlertRecord(JsonObject record){
         //处理告警开始时间、结束时间和接收时间
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(AlertConstVariable.ALERT_TIME_PATTERN);
         startsAt = getAlertTime(record,"startsAt",simpleDateFormat);
@@ -64,7 +67,15 @@ public class AlertRecord {
         lastReceiveTime = new Date().getTime()/1000;//精确到秒
         times = 1;
         status = AlertConstVariable.ALERT_STATUS_FIRING;//告警状态为触发状态
-        Map labels = record.get("labels") == null ? null : (Map) record.get("labels");
+        Map labels = null;
+        JsonObject jsonLabels =  record.get("labels") == null ? null :record.get("labels").getAsJsonObject();
+        if (jsonLabels != null){
+            labels = new HashMap();
+            for (Map.Entry<String,JsonElement> entry:jsonLabels.entrySet()){
+                labels.put(entry.getKey(),entry.getValue().getAsString());
+            }
+        }
+
         if (labels == null){
             System.out.println("未找到告警信息的【lables】标识，无法初始化");
         }else {
@@ -78,10 +89,10 @@ public class AlertRecord {
      * @date 2017/11/16
      * @author Niemingming
      */
-    private long getAlertTime(Map record, String key, SimpleDateFormat simpleDateFormat) {
+    private long getAlertTime(JsonObject record, String key, SimpleDateFormat simpleDateFormat) {
         Object start = record.get(key);
         if (start != null) {
-            String startstr = start.toString().replace("T"," ").substring(0,Math.min(19,start.toString().length()));
+            String startstr = ((JsonPrimitive)start).getAsString().replace("T"," ").substring(0,Math.min(19,start.toString().length()));
             try {
                 return simpleDateFormat.parse(startstr).getTime()/1000;
             } catch (ParseException e) {
@@ -98,9 +109,7 @@ public class AlertRecord {
      * @author Niemingming
      */
     public AlertRecord(DBObject record){
-        //从数据库获取，提取关键时间字段即为labels
-        Object alertname = record.get("alertname");
-        setAlertname(alertname + "");
+
         //提取非labels字段，并赋值
         String mid = record.removeField("_id")+"";
         startsAt = record.get("startsAt") == null ? 0l :(Long) record.removeField("startsAt");
@@ -110,8 +119,11 @@ public class AlertRecord {
         times = record.get("times") == null ? 0 :(Integer) record.removeField("times");
         status = record.removeField("status")+"";
         alertId = record.removeField("alertId")+"";
+        message = record.removeField("message") + "";
         //形成labels字段，并计算id
         setLabels(record.get("labels") == null ? new HashMap() : (Map) record.get("labels"));
+        //从数据库获取，提取关键时间字段即为labels
+        setAlertname(this.labels.get("alertname") + "");
         id = mid;
     }
 
@@ -271,6 +283,7 @@ public class AlertRecord {
         object.put("status",status);
         object.put("level",level);
         object.put("alertId",alertId);
+        object.put("message",message);
         object.put("labels",this.labels);
         return object;
     }
@@ -315,6 +328,7 @@ public class AlertRecord {
                 ", labels=" + labels +
                 ",level=" + level +
                 ",alertId=" + alertId +
+                ",message=" + message +
                 '}';
     }
 }

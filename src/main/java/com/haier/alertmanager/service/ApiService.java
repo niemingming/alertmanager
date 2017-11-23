@@ -1,7 +1,8 @@
 package com.haier.alertmanager.service;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import com.haier.alertmanager.configuration.AlertConfigurationProp;
+import com.haier.alertmanager.configuration.AlertConstVariable;
 import com.haier.alertmanager.container.AlertDictionaryContainer;
 import com.haier.alertmanager.container.AlertExcluseContainer;
 import com.haier.alertmanager.container.MessageReceiverContainer;
@@ -17,12 +18,15 @@ import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -113,16 +117,29 @@ public class ApiService {
             while ((str = reader.readLine()) != null){
                 queryCon.append(str);
             }
-            Map page = null;
-            Map filter = new HashMap();
+            JsonObject page = null;
+            JsonObject filter = new JsonObject();
             //获取分页条件和过滤条件
             if (!"".equals(queryCon.toString())){
-                Map query = gson.fromJson(queryCon.toString(),Map.class);
-                page = query.get("pageinfo") == null ? null : (Map) query.get("pageinfo");
-                filter = query.get("query") == null ? new HashMap() : (Map) query.get("query");
+                JsonObject query = gson.fromJson(queryCon.toString(),JsonObject.class);
+                page = query.get("pageinfo") == null ? null : (JsonObject) query.get("pageinfo");
+                filter = query.get("query") == null ? new JsonObject() : (JsonObject) query.get("query");
             }
             DBObject qcon = new BasicDBObject();
-            qcon.putAll(filter);
+            for (Map.Entry<String,JsonElement> entry:filter.entrySet()){
+                if (entry.getValue().isJsonObject()) {
+                    for (Map.Entry<String,JsonElement> range:entry.getValue().getAsJsonObject().entrySet()){
+                        JsonPrimitive jsonPrimitive = (JsonPrimitive) range.getValue();
+                        if (jsonPrimitive.isNumber()) {
+                            qcon.put(entry.getKey(),new BasicDBObject(range.getKey(),range.getValue().getAsDouble()));
+                        }else {
+                            qcon.put(entry.getKey(),new BasicDBObject(range.getKey(),range.getValue().getAsString()));
+                        }
+                    }
+                }else {
+                    qcon.put(entry.getKey(),entry.getValue().getAsString());
+                }
+            }
             //按照告警开始时间倒序
             DBObject sort = new BasicDBObject("startsAt",-1);
             long total = 0l;
@@ -131,7 +148,9 @@ public class ApiService {
             //需要分页查询
             if (page != null){
                 total = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).count(qcon);
-                cursor.skip(page.get("from") == null ? 0 : (int) Math.round((Double) page.get("from"))).limit(page.get("size") == null ? 10: (int) Math.round((Double) page.get("size")));
+                long from = page.get("from") == null ? 0 : page.get("from").getAsLong();
+                long size = page.get("size") == null ? 10 : page.get("size").getAsLong();
+                cursor.skip((int) from).limit((int) size);
             }else {
                 total = cursor.size();
             }
@@ -171,7 +190,6 @@ public class ApiService {
     public void queryAlertingById(@PathVariable String id,HttpServletResponse response) {
         //创建返回结果信息对象
         ApiResult result = new ApiResult();
-        Gson gson = new Gson();
         //根据id从当前告警表中查询告警详情
         DBObject queryRes = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).findOne(id);
         if (queryRes == null){
@@ -227,17 +245,17 @@ public class ApiService {
             }
             //创建ES查询对象
             EsQueryObject esQueryObject = new EsQueryObject();
-            Map page = null;
-            Map filter = new HashMap();
+            JsonObject page = null;
+            JsonObject filter = new JsonObject();
             //获取分页条件和过滤条件
             if (!"".equals(queryCon.toString())) {
-                Map query = gson.fromJson(queryCon.toString().replace("$",""), Map.class);
-                page = query.get("pageinfo") == null ? null : (Map) query.get("pageinfo");
-                filter = query.get("query") == null ? new HashMap() : (Map) query.get("query");
+                JsonObject query = gson.fromJson(queryCon.toString().replace("$",""), JsonObject.class);
+                page = query.get("pageinfo") == null ? null : (JsonObject) query.get("pageinfo");
+                filter = query.get("query") == null ? new JsonObject() : (JsonObject) query.get("query");
             }
             if (page != null){//带有分页条件时，设置分页数据
-                int from = page.get("from") == null ? 0 : (int) Math.round((Double) page.get("from"));
-                int size = page.get("size") == null ? 10000: (int) Math.round((Double) page.get("size"));
+                long from = page.get("from") == null ? 0 : page.get("from").getAsLong();
+                long size = page.get("size") == null ? 10000: page.get("size").getAsLong();
                 esQueryObject.setFrom(from);
                 esQueryObject.setSize(size);
             }
@@ -245,7 +263,8 @@ public class ApiService {
             esQueryObject.addQueryCondition(filter);
             //这里采用同步请求方法
             RestClient client = getRestClient();
-            StringEntity queryBody = new StringEntity(gson.toJson(esQueryObject));
+            StringEntity queryBody = new StringEntity(gson.toJson(esQueryObject),"UTF-8");
+            queryBody.setContentType("application/json;charset=UTF-8");
             Header header = new BasicHeader("content-type","application/json");
             //请求ES查询历史数据
             Response queryResult = client.performRequest("GET","/_search",new HashMap<String,String>(),queryBody,header);
@@ -281,19 +300,19 @@ public class ApiService {
         ApiResult result = new ApiResult();
         Gson gson = new Gson();
         //根据id从ES中查询告警详情
-        Header header = new BasicHeader("content-type","application/json");
+        Header header = new BasicHeader("content-type","application/json;charset=UTF-8");
         try {
             Response detail = restClient.performRequest("GET",endpoint,header);
-            Map resultJson = gson.fromJson(EntityUtils.toString(detail.getEntity()),Map.class);
-            if (resultJson.get("found") != null &&(Boolean)resultJson.get("found")) {
-                Map source = (Map) resultJson.get("_source");
-                source.put("_index",index);
-                source.put("_id",id);
+            JsonObject resultJson = gson.fromJson(EntityUtils.toString(detail.getEntity()),JsonObject.class);
+            if (resultJson.get("found") != null &&resultJson.get("found").getAsBoolean()) {
+                JsonObject source = resultJson.get("_source").getAsJsonObject();
+                source.addProperty("_index",index);
+                source.addProperty("_id",id);
                 result.setData(source);
                 result.setSuccess(true);
                 result.setTotal(1);
                 result.setCode(0);
-            }else if (resultJson.containsKey("error")){
+            }else if (resultJson.keySet().contains("error")){
                 result.setHint("传入的index【" + index + "】不存在！");
             }else {
                 //未能从ES中查到
@@ -328,7 +347,6 @@ public class ApiService {
         RestClient restClient = getRestClient();
         //创建返回结果信息对象
         ApiResult result = new ApiResult();
-        Gson gson = new Gson();
         //根据id从ES中查询告警详情
         Header header = new BasicHeader("content-type","application/json");
         try {
@@ -367,28 +385,28 @@ public class ApiService {
         Gson gson = new Gson();
         //获取结果字符串
         String resultJson = EntityUtils.toString(queryResult.getEntity());
-        Map resultObj = gson.fromJson(resultJson,Map.class);
+        JsonObject resultObj = gson.fromJson(resultJson,JsonObject.class);
         //分析查询结果,判断查询是否出错
         if (resultObj.get("error") != null) {
             result.setHint("查询ES数据出现异常！");
         }else{
-            Map hits = (Map) resultObj.get("hits");
+            JsonObject hits =  resultObj.get("hits").getAsJsonObject();
             //获取总数
-            result.setTotal(hits.get("total") == null ? 0l :  Math.round((Double)hits.get("total")));
+            result.setTotal(hits.get("total") == null ? 0l : hits.get("total").getAsLong());
             //将结果数据返回
             List data = new ArrayList();
-            List datas = (List) hits.get("hits");
+            JsonArray datas = (JsonArray) hits.get("hits");
             for (int i = 0; i < datas.size(); i++){
                 //获取单条记录
-                Map record = (Map) datas.get(i);
-                Map source = (Map) record.get("_source");
-                source.put("_index",record.get("_index"));
-                source.put("_id",record.get("_id"));
+                JsonObject record = datas.get(i).getAsJsonObject();
+                JsonObject source = record.get("_source").getAsJsonObject();
+                source.addProperty("_index",record.get("_index").getAsString());
+                source.addProperty("_id",record.get("_id").getAsString());
                 //将结果添加进去
                 data.add(source);
-                result.setSuccess(true);
-                result.setCode(0);
             }
+            result.setSuccess(true);
+            result.setCode(0);
             result.setData(data);
         }
     }
@@ -409,14 +427,68 @@ public class ApiService {
         return restClient;
     }
     /**
+     * @description 初始化ESmapping
+     * PUT /alert-*
+     * {
+     *     mappgings:{
+     *         alert_mapping:{//映射名称
+     *             properties:{
+     *                 startsAt:{type:"date",format:"epoch_second"},//日期格式默认为Unix秒
+     *                 endsAt:{type:"date",format:"epoch_second"},
+     *                 times:{type:"integer"},
+     *                 lastNotifyTime:{type:"date",format:"epoch_second"},
+     *                 lastReceiveTime:{type:"date",format:"epoch_second"},
+     *                 status:{type:"keyword"},
+     *                 message:{type:"text"}
+     *             }
+     *         }
+     *     }
+     * }
+     * @date 2017/11/23
+     * @author Niemingming
+     */
+    @ResponseBody
+    @RequestMapping("/initEsMappging")
+    public String initESMapping() {
+        RestClient restClient = getRestClient();
+        //采用通配符来设置映射
+        String endPoint = "/" + alertConfigurationProp.indexpre + "*/HISTORY/_mapping";
+        DefaultResourceLoader loader = new DefaultResourceLoader();
+        try {
+            File file = loader.getResource(AlertConstVariable.ES_MAPPING_FILE).getFile();
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+            StringBuilder mapping = new StringBuilder();
+            String str = null;
+            while ((str = bufferedReader.readLine()) != null){
+                //忽略注释
+                if (str.startsWith("//")){
+                    continue;
+                }
+                mapping.append(str);
+            }
+            System.out.println(mapping.toString());
+            StringEntity entity = new StringEntity(mapping.toString(),"UTF-8");
+            entity.setContentType("application/json;charset=UTF-8");
+            Header header = new BasicHeader("content-type","application/json");
+            Response response = restClient.performRequest("POST",endPoint,new HashMap<String, String>(),entity,header);
+            String result = EntityUtils.toString(response.getEntity());
+            System.out.println(result);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "failure";
+        }
+        return "success";
+    }
+
+    /**
      * @description ES查询对象，用于生成ES的查询json数据
      * @date 2017/11/22
      * @author Niemingming
      */
     public class EsQueryObject{
         /*分页查询起始位置，默认是0*/
-        private int from = 0;
-        private int size = 10000;//默认不分页，ES默认的最大查询结果是10000条
+        private long from = 0;
+        private long size = 10000;//默认不分页，ES默认的最大查询结果是10000条
         private List sort;
         private Map query;
 
@@ -438,18 +510,28 @@ public class ApiService {
             bool.put("filter",filter);
         }
 
-        public void addQueryCondition(Map cons){
+        public void addQueryCondition(JsonObject cons){
             List filters = (List) ((Map)query.get("bool")).get("filter");
-            for (Object field:cons.keySet()){
+            for (String field:cons.keySet()){
                 Object value = cons.get(field);
                 //范围查询，格式为{range:{field:{$ge:value}}}
                 Map fieldr = new HashMap();
-                fieldr.put(field,value);
-                if (value instanceof Map){
+                fieldr.put(field,value.toString());
+                if (value instanceof JsonObject){
+                    JsonObject filter = (JsonObject) value;
+                    for (Map.Entry<String,JsonElement> entry: filter.entrySet()){
+                        JsonPrimitive obj = (JsonPrimitive) entry.getValue();
+                        if (obj.isNumber()){
+                            fieldr.put(field,new BasicDBObject(entry.getKey(),obj.getAsDouble()));
+                        }else {
+                            fieldr.put(field,new BasicDBObject(entry.getKey(),obj.getAsString()));
+                        }
+                    }
                     Map range = new HashMap();
                     range.put("range",fieldr);
                     filters.add(range);
-                }else {//如果其他类型，表示是字符串,格式为{term:{field:value}}
+                }else if (value instanceof JsonPrimitive){//如果其他类型，表示是字符串,格式为{term:{field:value}}
+                    fieldr.put(field,((JsonPrimitive)value).getAsString());
                     Map term = new HashMap();
                     term.put("term",fieldr);
                     filters.add(term);
@@ -457,19 +539,19 @@ public class ApiService {
             }
         }
 
-        public int getFrom() {
+        public long getFrom() {
             return from;
         }
 
-        public void setFrom(int from) {
+        public void setFrom(long from) {
             this.from = from;
         }
 
-        public int getSize() {
+        public long getSize() {
             return size;
         }
 
-        public void setSize(int size) {
+        public void setSize(long size) {
             this.size = size;
         }
     }

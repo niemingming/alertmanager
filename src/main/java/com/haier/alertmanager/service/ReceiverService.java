@@ -1,6 +1,8 @@
 package com.haier.alertmanager.service;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.haier.alertmanager.container.AlertRecordContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,9 +47,9 @@ public class ReceiverService {
             alerts.append(string);
         }
         //将告警信息转成json数据，并处理告警记录
-        List labels = gson.fromJson(alerts.toString(),List.class);
+        JsonArray labels = gson.fromJson(alerts.toString(),JsonArray.class);
         for (int i = 0; i < labels.size(); i++){
-            Map alertRecord = (Map) labels.get(i);
+            JsonObject alertRecord = labels.get(i).getAsJsonObject();
             alertRecordContainer.addRecord(alertRecord);
         }
         //返回成功状态

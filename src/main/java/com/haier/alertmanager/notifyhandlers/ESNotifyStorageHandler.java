@@ -14,7 +14,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -76,9 +75,11 @@ public class ESNotifyStorageHandler implements INotifyStorageHandler {
         String id = record.getAlertId();
         //获取ES保存接口endpoint
         String endpoint = "/" + index + "/" + alertConfigurationProp.esType + "/" + id;
+        StringEntity queryBody = new StringEntity(body,"UTF-8");
+        queryBody.setContentType("application/json;charset=UTF-8");
         try {
-            restClient.performRequestAsync("PUT",endpoint,params,new StringEntity(body),new EsResponseLisnter(record,index,id,dateformat));
-        } catch (UnsupportedEncodingException e) {
+            restClient.performRequestAsync("PUT",endpoint,params,queryBody,new EsResponseLisnter(record,index,id,dateformat));
+        } catch (Exception e) {
             e.printStackTrace();
         }
         //错误信息存在日志文件中，我们需要删除记录

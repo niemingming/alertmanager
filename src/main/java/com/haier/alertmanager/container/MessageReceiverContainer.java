@@ -1,6 +1,8 @@
 package com.haier.alertmanager.container;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.haier.alertmanager.configuration.AlertConstVariable;
 import com.haier.alertmanager.model.AlertRecord;
 import com.haier.alertmanager.model.MessageReceiverInfo;
@@ -59,7 +61,12 @@ public class MessageReceiverContainer {
                     MessageReceiverInfo messageReceiverInfo = new MessageReceiverInfo();
                     messageReceiverInfo.setPersonId(info[0]);
                     messageReceiverInfo.setPersonName(info[1]);
-                    messageReceiverInfo.setFilters(gson.fromJson(info[2],Map.class));
+                    JsonObject filters = gson.fromJson(info[2],JsonObject.class);
+                    Map filterMap = new HashMap();
+                    for (Map.Entry<String,JsonElement> entry:filters.entrySet()){
+                        filterMap.put(entry.getKey(),entry.getValue().getAsString());
+                    }
+                    messageReceiverInfo.setFilters(filterMap);
                     //判断是否已经存入缓存，如果没有就创建一个集合存入，如果有直接添加。
                     List<MessageReceiverInfo> messageReceiverInfos = messageRecevierMap.get(messageReceiverInfo.getId());
                     if (messageReceiverInfos == null) {

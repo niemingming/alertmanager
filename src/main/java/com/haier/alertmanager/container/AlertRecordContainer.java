@@ -1,5 +1,6 @@
 package com.haier.alertmanager.container;
 
+import com.google.gson.JsonObject;
 import com.haier.alertmanager.configuration.AlertConfigurationProp;
 import com.haier.alertmanager.configuration.AlertConstVariable;
 import com.haier.alertmanager.model.AlertRecord;
@@ -54,7 +55,7 @@ public class AlertRecordContainer {
      * @date 2017/11/16
      * @author Niemingming
      */
-    public AlertRecord addRecord(Map record){
+    public AlertRecord addRecord(JsonObject record){
         AlertRecord record1 = new AlertRecord(record);
         AlertRecord record2 = records.get(record1.getId());
         //判断缓存中是否存在，如果存在则更新接收次数和上次接收时间字段。
@@ -73,7 +74,6 @@ public class AlertRecordContainer {
             //如果有结束时间，而缓存中没有，表示已经转储的记录，不需要重新处理，这些记录会被忽略掉
             return record1;
         }else{
-
             records.put(record1.getId(),record1);
         }
         //更新或者插入告警记录
