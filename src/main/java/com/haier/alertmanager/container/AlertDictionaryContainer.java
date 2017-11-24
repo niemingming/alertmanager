@@ -72,6 +72,8 @@ public class AlertDictionaryContainer {
             System.out.println("未能查询到【" + alertname + "】的告警数据字典");
             return "";
         }
+        //同时复制告警级别
+        record.setLevel(alertDictionary.getAlertlevel());
         templateStr.append(alertDictionary.getAlertsummary());
         if (appedReason){
             templateStr.append("\n").append(alertDictionary.getAlertreason());

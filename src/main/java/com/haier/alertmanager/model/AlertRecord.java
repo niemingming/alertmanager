@@ -120,6 +120,7 @@ public class AlertRecord {
         status = record.removeField("status")+"";
         alertId = record.removeField("alertId")+"";
         message = record.removeField("message") + "";
+        level = record.removeField("level") + "";
         //形成labels字段，并计算id
         setLabels(record.get("labels") == null ? new HashMap() : (Map) record.get("labels"));
         //从数据库获取，提取关键时间字段即为labels

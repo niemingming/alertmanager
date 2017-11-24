@@ -68,9 +68,11 @@ public class AlertRecordContainer {
             shouldexec = object != null;
         }
         if (object != null){
+            //如果数据库不为空，将通用属性赋值到新记录中。
             AlertRecord tmp = new AlertRecord(object);
             record1.setLastNotifyTime(tmp.getLastNotifyTime());
             record1.setTimes(tmp.getTimes()+1);
+            record1.setLevel(tmp.getLevel());
             record1.setMessage(tmp.getMessage());
         }
         //如果没有结束时间，或者有但是需要更新时，执行更新操作。
