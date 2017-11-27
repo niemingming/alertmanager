@@ -9,6 +9,8 @@
     * [1.2.1.历史告警列表查询](#1.2.1)
     * [1.2.2.历史告警详情查询](#1.2.2)
     * [1.2.3.历史告警搜索](#1.2.3)
+  * [1.3.公共编码查询](#1.3)
+    * [1.3.1.告警级别编码查询](#1.3.1)
 * [2.系统配置](#2)
   * [2.1.配置信息刷新](#2.1)
   
@@ -504,6 +506,52 @@ GET /queryAlertingById/{id}//id为记录id
 ]
 }
 }
+```
+<h4 id="1.3">1.3公共编码查询</h4>
+查询告警板中用到的公共编码。
+<h5 id="1.3.1">1.3.1告警级别编码查询</h5>
+查询告警板配置的公共编码
+访问格式为：
+
+```
+GET /api/queryAlertLevels
+```
+返回的数据格式为：
+
+```
+{
+     *      success:true,
+     *      code:0/1,
+     *      data:{
+     *          error:"紧急",
+     *          warn:"严重",
+     *          info:"一般",
+     *          debug:"提示"
+     *      }
+     * }
+```
+下面我们使用httpClient模拟访问操作如下：
+
+```
+        HttpClient client = HttpClients.createDefault();
+        HttpGet get = new HttpGet("http://localhost:8081/api/queryAlertLevels");
+        HttpResponse response = client.execute(get);
+        HttpEntity res = response.getEntity();
+        System.out.println(EntityUtils.toString(res));
+```
+返回的数据为：
+
+```
+{
+ "success":true,
+ "code":0,
+ "data":{
+   "error":"紧急",
+   "warn":"严重",
+   "info":"一般",
+   "debug":"提示"
+  }
+ }
 ```
 <h3 id="2">2.系统配置</h3>
 <h4 id="2.1">2.1配置信息刷新</h4>
