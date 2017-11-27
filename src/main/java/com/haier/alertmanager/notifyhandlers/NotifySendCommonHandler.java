@@ -17,6 +17,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -125,7 +126,8 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
                 param.content = record.getMessage();
                 param.targets = targets.toString();
                 try {
-                    post.setEntity(new UrlEncodedFormEntity(param.toParams(),"UTF-8"));
+                    //改为请求体格式
+                    post.setEntity(new StringEntity(new Gson().toJson(param)));
                     //执行请求
                     HttpResponse response = client.execute(post);
                     String result = EntityUtils.toString(response.getEntity());
