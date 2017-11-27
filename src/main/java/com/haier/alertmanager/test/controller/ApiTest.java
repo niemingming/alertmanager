@@ -26,8 +26,9 @@ public class ApiTest {
 //        queryHistoryList();
 //        queryHistoryById();
 //        searchHistoryList();
-        queryGroup();
+//        queryGroup();
 //        testgson();
+        queryLevelCode();
     }
 
 
@@ -107,6 +108,14 @@ public class ApiTest {
         StringEntity stringEntity = new StringEntity(stringBuilder.toString());
         post.setEntity(stringEntity);
         HttpResponse response = client.execute(post);
+        HttpEntity res = response.getEntity();
+        System.out.println(EntityUtils.toString(res));
+    }
+
+    public static void queryLevelCode() throws IOException {
+        HttpClient client = HttpClients.createDefault();
+        HttpGet get = new HttpGet("http://localhost:8081/api/queryAlertLevels");
+        HttpResponse response = client.execute(get);
         HttpEntity res = response.getEntity();
         System.out.println(EntityUtils.toString(res));
     }

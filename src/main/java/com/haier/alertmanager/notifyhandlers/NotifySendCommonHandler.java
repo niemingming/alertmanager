@@ -3,6 +3,7 @@ package com.haier.alertmanager.notifyhandlers;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.haier.alertmanager.configuration.AlertConfigurationProp;
+import com.haier.alertmanager.container.AlertDictionaryContainer;
 import com.haier.alertmanager.container.AlertRecordContainer;
 import com.haier.alertmanager.container.MessageReceiverContainer;
 import com.haier.alertmanager.model.AlertRecord;
@@ -47,6 +48,9 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
     /*MongoDB数据库操作*/
     @Autowired
     private MongoTemplate mongoTemplate;
+    /**数据字典*/
+    @Autowired
+    private AlertDictionaryContainer alertDictionaryContainer;
 
     /**
      * @description 初始化方法
@@ -92,6 +96,8 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
         if (record.getLastNotifyTime() == 0
                 || now - record.getLastNotifyTime() >= resendinterval
                 || record.getEndsAt() > record.getLastNotifyTime()){
+            String message = alertDictionaryContainer.getNotifyMessage(record);
+            record.setMessage(message);
             //将发送规则下沉到具体规则实现中，这里规则是当没有发送过通知，或者发送通知达到重发间隔时发送消息通知，或者消息结束时间大于上次通知时间，表示还没发送过。
             List<MessageReceiverInfo> messageReceiverInfos = messageReceiverContainer.getReceiversByRecord(record);
             if (messageReceiverInfos.isEmpty()) {

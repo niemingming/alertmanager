@@ -1,6 +1,5 @@
 package com.haier.alertmanager.service;
 
-import com.haier.alertmanager.container.AlertDictionaryContainer;
 import com.haier.alertmanager.container.AlertExcluseContainer;
 import com.haier.alertmanager.model.AlertRecord;
 import com.haier.alertmanager.notifyhandlers.INotifySendHanlder;
@@ -23,13 +22,6 @@ public class NotifySendService {
     /*消息发送处理器*/
     @Autowired
     private List<INotifySendHanlder> notifySendHanlders;
-    /**数据字典*/
-    @Autowired
-    private AlertDictionaryContainer alertDictionaryContainer;
-
-
-
-
     /**
      * @description 发送通知消息
      * @date 2017/11/16
@@ -39,8 +31,7 @@ public class NotifySendService {
 
         //如果不在白名单列表中，发送通知。
         if (!alertExcluseContainer.inExcluseList(record)){
-            String message = alertDictionaryContainer.getNotifyMessage(record);
-            record.setMessage(message);
+
             for (INotifySendHanlder notifySendHanlder:notifySendHanlders){
                 //如果处理器可以处理消息发送，就有该处理器处理，并且排序靠前的处理器享有较高的处理优先级
                 if (notifySendHanlder.supportRule(record)){
