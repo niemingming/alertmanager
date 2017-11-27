@@ -625,6 +625,33 @@ public class ApiService {
         }
         return "success";
     }
+    /**
+     * @description 查询公共编码中的告警级别编码
+     * GET /api/queryAlertLevels
+     * 返回数据：
+     * {
+     *      success:true,
+     *      code:0/1,
+     *      data:{
+     *          error:"紧急",
+     *          warn:"严重",
+     *          info:"一般",
+     *          debug:"提示"
+     *      }
+     * }
+     * @date 2017/11/27
+     * @author Niemingming
+     */
+    @ResponseBody
+    @RequestMapping("/queryAlertLevels")
+    public void queryAlertLevels(HttpServletResponse response) {
+        ApiResult result = new ApiResult();
+        Map levels = alertConfigurationProp.alertlevel;
+        result.setData(levels);
+        result.setSuccess(true);
+        result.setCode(0);
+        writeOutData(response,result);
+    }
 
     /**
      * @description ES查询对象，用于生成ES的查询json数据

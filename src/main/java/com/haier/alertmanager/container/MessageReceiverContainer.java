@@ -96,7 +96,7 @@ public class MessageReceiverContainer {
      */
     public List<MessageReceiverInfo> getReceiversByRecord(AlertRecord record){
         List<MessageReceiverInfo> messageReceiverInfos = new ArrayList<MessageReceiverInfo>();
-        Map<String,Object> map = record.getLabels();
+        Map<String,Object> map = record.toMap();
         //遍历判断有哪些需要发送消息服务
         for (Map.Entry<String,List<MessageReceiverInfo>> entry : messageRecevierMap.entrySet()){
             MessageReceiverInfo messageReceiverInfo = entry.getValue().get(0);

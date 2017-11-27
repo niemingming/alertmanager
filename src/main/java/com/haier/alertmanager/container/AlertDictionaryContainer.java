@@ -73,27 +73,27 @@ public class AlertDictionaryContainer {
             return "";
         }
         //同时复制告警级别
-        record.setLevel(alertDictionary.getAlertlevel());
-        templateStr.append(alertDictionary.getAlertsummary());
+        setAlertLevel(record,alertDictionary);
+        templateStr.append(alertDictionary.getDescription());
         if (appedReason){
-            templateStr.append("\n").append(alertDictionary.getAlertreason());
+            templateStr.append("\n").append(alertDictionary.getSuggest());
         }
         return simpleTemplate.decodeTemplate(templateStr.toString(),record.toMap());
     }
     /**
-     * @description 设置告警的级别
+     * @description 设置告警的数据字典字段
      * @date 2017/11/21
      * @author Niemingming
      */
-    public void setAlertLevel(AlertRecord record) {
-        String alertname = record.getAlertname();
-        AlertDictionary alertDictionary = alertDictionaryMap.get(alertname);
-        //未查询到告警配置信息
-        if (alertDictionary == null){
-            System.out.println("未能查询到【" + alertname + "】的告警数据字典");
-            return;
-        }
+    public void setAlertLevel(AlertRecord record, AlertDictionary alertDictionary) {
         record.setLevel(alertDictionary.getAlertlevel());
+        //设置告警分类
+        record.setAlertCategory(alertDictionary.getAlertCategory());
+        //获取告警描述
+        record.setDescription(simpleTemplate.decodeTemplate(alertDictionary.getDescription(),record.toMap()));
+        //获取告警建议
+        record.setSuggest(simpleTemplate.decodeTemplate(alertDictionary.getSuggest(),record.toMap()));
+
     }
 
     /**

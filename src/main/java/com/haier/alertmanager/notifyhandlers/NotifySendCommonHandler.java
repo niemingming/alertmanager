@@ -8,20 +8,14 @@ import com.haier.alertmanager.container.MessageReceiverContainer;
 import com.haier.alertmanager.model.AlertRecord;
 import com.haier.alertmanager.model.MessageReceiverInfo;
 import com.mongodb.DBObject;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.EntityBuilder;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -29,8 +23,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -113,21 +105,21 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
                         .setSocketTimeout(10000).setConnectionRequestTimeout(10000).build();
                 post.setConfig(config);
                 //获取所有请求人员
-                StringBuilder targets = new StringBuilder();
+               List targets = new ArrayList();
                 for (MessageReceiverInfo messageReceiverInfo:messageReceiverInfos){
-                    targets.append(messageReceiverInfo.getPersonId()).append(",");
+                    targets.add(messageReceiverInfo.getPersonId());
                 }
-                if (targets.length() > 0){
-                    targets.delete(targets.length()-1,targets.length());
-                }
+
                 //构建参数
                 notifyParam param = new notifyParam();
-                param.subject = record.getLabels().get("project") + "" + record.getLabels().get("alertname") ;
+                param.subject = record.getProject() + "-" + record.getAlertname();
                 param.content = record.getMessage();
-                param.targets = targets.toString();
+                param.targets = targets;
                 try {
                     //改为请求体格式
-                    post.setEntity(new StringEntity(new Gson().toJson(param)));
+                    StringEntity entity = new StringEntity(new Gson().toJson(param),"utf-8");
+                    entity.setContentType("application/json;charset=utf-8");
+                    post.setEntity(entity);
                     //执行请求
                     HttpResponse response = client.execute(post);
                     String result = EntityUtils.toString(response.getEntity());
@@ -156,7 +148,7 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
         /*通知主题*/
         public String subject;
         /*通知目标*/
-        public String targets;
+        public List targets;
         /*通知内容*/
         public String content;
         /*通知类型1：既发送邮件又发送iHaier消息*/
@@ -170,7 +162,7 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
             List<NameValuePair> pairs = new ArrayList<NameValuePair>();
             NameValuePair subjectPair = new BasicNameValuePair("subject",subject);
             NameValuePair contentPair = new BasicNameValuePair("content",content);
-            NameValuePair targetsPair = new BasicNameValuePair("targets",targets);
+            NameValuePair targetsPair = new BasicNameValuePair("targets",targets.toString());
             NameValuePair messageTypePair = new BasicNameValuePair("messageType",messageType+"");
             pairs.add(subjectPair);
             pairs.add(contentPair);

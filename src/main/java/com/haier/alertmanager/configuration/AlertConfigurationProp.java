@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description 告警通知应用所有的配置信息
@@ -39,6 +40,11 @@ public class AlertConfigurationProp {
     /*消息通信地址*/
     @Value("${alertmanager.notifyurl}")
     public String messageUri;
+    /*公共编码*/
+    @Autowired
+    public AlertManagerCode alertManagerCode;
+    /*告警级别*/
+    public Map<String,String> alertlevel;
 
     @Autowired
     private ElasticsearchConfiguration elasticsearchConfiguration;
@@ -49,6 +55,7 @@ public class AlertConfigurationProp {
         this.esType = elasticsearchConfiguration.getType();
         this.indexpre = elasticsearchConfiguration.getIndexpre();
         this.esTemplateAddress = elasticsearchConfiguration.getTemplate();
+        this.alertlevel = alertManagerCode.getAlertlevel();
     }
 
 }

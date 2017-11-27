@@ -12,21 +12,21 @@ public class AlertDictionary {
     private String alertname;
     /*告警级别*/
     private String alertlevel;
-    /*告警提示信息，可以使用变量占位符${labels.name},${startsAt}*/
-    private String alertsummary;
-    /*告警原因*/
-    private String alertreason;
+    /*告警描述，可以使用变量占位符${labels.name},${startsAt}*/
+    private String description;
+    /*告警建议 */
+    private String suggest;
     /*告警类型：机器、应用、中间件等*/
-    private String alerttype;
+    private String alertCategory;
 
     public AlertDictionary() {
     }
     public AlertDictionary(DBObject dict) {
         alertname = dict.get("alertname") + "";
         alertlevel = dict.get("level")+"";
-        alertsummary = dict.get("summary")+"";
-        alertreason = dict.get("reason")+"";
-        alerttype = dict.get("type")+"";
+        description = dict.get("description")+"";
+        suggest = dict.get("suggest")+"";
+        alertCategory = dict.get("alertCategory")+"";
     }
 
     public String getAlertname() {
@@ -45,28 +45,28 @@ public class AlertDictionary {
         this.alertlevel = alertlevel;
     }
 
-    public String getAlertsummary() {
-        return alertsummary;
+    public String getDescription() {
+        return description;
     }
 
-    public void setAlertsummary(String alertsummary) {
-        this.alertsummary = alertsummary;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getAlertreason() {
-        return alertreason;
+    public String getSuggest() {
+        return suggest;
     }
 
-    public void setAlertreason(String alertreason) {
-        this.alertreason = alertreason;
+    public void setSuggest(String suggest) {
+        this.suggest = suggest;
     }
 
-    public String getAlerttype() {
-        return alerttype;
+    public String getAlertCategory() {
+        return alertCategory;
     }
 
-    public void setAlerttype(String alerttype) {
-        this.alerttype = alerttype;
+    public void setAlertCategory(String alertCategory) {
+        this.alertCategory = alertCategory;
     }
 
     @Override
@@ -89,9 +89,9 @@ public class AlertDictionary {
         return "AlertDictionary{" +
                 "alertname='" + alertname + '\'' +
                 ", alertlevel='" + alertlevel + '\'' +
-                ", alertsummary='" + alertsummary + '\'' +
-                ", alertreason='" + alertreason + '\'' +
-                ", alerttype='" + alerttype + '\'' +
+                ", description='" + description + '\'' +
+                ", suggest='" + suggest + '\'' +
+                ", alertCategory='" + alertCategory + '\'' +
                 '}';
     }
 }

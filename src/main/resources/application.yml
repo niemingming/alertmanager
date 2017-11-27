@@ -33,3 +33,9 @@ alertmanager:
     template: "classpath:notifysend/esmapping5.x.json"
   #notifyService endpoint
   notifyurl: http://10.130.236.34:8080/api/notify/message
+  code:
+    alertlevel:
+      error: 紧急
+      warn: 严重
+      info: 一般
+      debug: 提示

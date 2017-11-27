@@ -47,6 +47,14 @@ public class AlertRecord {
     private int times = 0;
     /**通知消息*/
     private String message;
+    /*告警描述*/
+    private String description;
+    /*告警建议*/
+    private String suggest;
+    /*告警分类*/
+    private String alertCategory;
+    /*项目名称*/
+    private String project;
     /**
      * @description 空函数的初始化操作，用于该类的一些方法
      * @date 2017/11/16
@@ -79,9 +87,13 @@ public class AlertRecord {
         if (labels == null){
             System.out.println("未找到告警信息的【lables】标识，无法初始化");
         }else {
-            String alertname = labels.get("alertname") + "";
+            setLabels(labels);//使用所有的labels计算id
+            //提取字段
+            String alertname = labels.remove("alertname") + "";
             setAlertname(alertname);
-            setLabels(labels);
+            //提取项目
+            String project = labels.remove("project") + "";
+            setProject(project);
         }
     }
     /**
@@ -119,12 +131,16 @@ public class AlertRecord {
         times = record.get("times") == null ? 0 :(Integer) record.removeField("times");
         status = record.removeField("status")+"";
         alertId = record.removeField("alertId")+"";
-        message = record.removeField("message") + "";
         level = record.removeField("level") + "";
+        //抽取project、suggest、description、alertname、alertCategory
+        project = record.get("project") + "";
+        alertname = record.get("alertname") + "";
+        suggest = record.get("suggest") + "";
+        description = record.get("description") + "";
+        alertCategory = record.get("alertCategory") + "";
+        message = description +"\n" + suggest;
         //形成labels字段，并计算id
         setLabels(record.get("labels") == null ? new HashMap() : (Map) record.get("labels"));
-        //从数据库获取，提取关键时间字段即为labels
-        setAlertname(this.labels.get("alertname") + "");
         id = mid;
     }
 
@@ -175,6 +191,38 @@ public class AlertRecord {
 
     public void setLastReceiveTime(long lastReceiveTime) {
         this.lastReceiveTime = lastReceiveTime;
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getSuggest() {
+        return suggest;
+    }
+
+    public void setSuggest(String suggest) {
+        this.suggest = suggest;
+    }
+
+    public String getAlertCategory() {
+        return alertCategory;
+    }
+
+    public void setAlertCategory(String alertCategory) {
+        this.alertCategory = alertCategory;
     }
 
     public Map getLabels() {
@@ -284,7 +332,11 @@ public class AlertRecord {
         object.put("status",status);
         object.put("level",level);
         object.put("alertId",alertId);
-        object.put("message",message);
+        object.put("project",project);
+        object.put("suggest",suggest);
+        object.put("description",description);
+        object.put("alertCategory",alertCategory);
+        object.put("alertname",alertname);
         object.put("labels",this.labels);
         return object;
     }
@@ -321,15 +373,22 @@ public class AlertRecord {
     public String toString() {
         return "AlertRecord{" +
                 "id='" + id + '\'' +
+                ", alertId='" + alertId + '\'' +
                 ", alertname='" + alertname + '\'' +
-                ", startAt=" + startsAt +
+                ", startsAt=" + startsAt +
                 ", endsAt=" + endsAt +
                 ", lastNotifyTime=" + lastNotifyTime +
                 ", lastReceiveTime=" + lastReceiveTime +
                 ", labels=" + labels +
-                ",level=" + level +
-                ",alertId=" + alertId +
-                ",message=" + message +
+                ", sortLabels='" + sortLabels + '\'' +
+                ", status='" + status + '\'' +
+                ", level='" + level + '\'' +
+                ", times=" + times +
+                ", message='" + message + '\'' +
+                ", description='" + description + '\'' +
+                ", suggest='" + suggest + '\'' +
+                ", alertCategory='" + alertCategory + '\'' +
+                ", project='" + project + '\'' +
                 '}';
     }
 }
