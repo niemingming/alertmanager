@@ -223,6 +223,15 @@ GET /api/queryAlertingById/247D78214DCCD7FE830EC039F2B310C4
         HttpEntity res = response.getEntity();
         System.out.println(EntityUtils.toString(res));
 ```
+以上代码等价于：
+
+```
+POST /api/queryAlertingByGroup
+{
+ "query":{"labels.project":["project1","project2"]},
+ group:["labels.project"]
+}
+```
 返回数据为：
 
 ```
