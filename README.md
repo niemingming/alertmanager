@@ -4,6 +4,7 @@
   * [1.1.当前告警查询](#1.1)
     * [1.1.1.告警列表查询](#1.1.1)
     * [1.1.2.告警详情查询](#1.1.2)
+    * [1.1.3.告警数据统计](#1.1.3)
   * [1.2.历史告警查询](#1.2)
     * [1.2.1.历史告警列表查询](#1.2.1)
     * [1.2.2.历史告警详情查询](#1.2.2)
@@ -177,7 +178,78 @@ GET /api/queryAlertingById/247D78214DCCD7FE830EC039F2B310C4
  }
 }
 ```
+<h5 id="1.1.3">1.1.3.告警数据统计</h5>
+查询条件和统计项，统计当前告警信息。具体格式如下：
+</br>查询格式
 
+```
+* POST /api/queryAlertingByGroup
+     * {
+     *     query:{//查询条件，遵循mongo的查询格式，如果为空，则查询全部数据
+     *          alertname:"testalert",
+     *          "labels.job":"tomcat",
+     *          times:{$gte:"10"}
+     *     },
+     *     group:["level","labels.project"]//可以按照多个字段，也可以按照一个字段
+     * }
+     
+```
+返回数据格式：
+
+```
+*{
+     *     success:bool(true/false),//表示是否成功
+     *     code:0/1 ,//执行结果编码，目前只有0成功，1失败
+     *     data:{
+     *         list:[]
+     *     }, //表示返回的记录列表详情
+```
+以下示例使用httpclient实现，查询project的name为"project1","project2"的记录，并按照"project"分组。代码如下：
+
+```
+        HttpClient client = HttpClients.createDefault();
+        HttpPost post = new HttpPost("http://localhost:8081/api/queryAlertingByGroup");
+        //不分页查询，列表查询为POST请求方式，条件为project=
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{")
+                .append("  query:{")
+                .append(" \"labels.project\":[\"project1\",\"project2\"]")
+                .append("  },")
+                .append(" group:[\"labels.project\"]")
+                .append("}");
+        StringEntity stringEntity = new StringEntity(stringBuilder.toString());
+        post.setEntity(stringEntity);
+        HttpResponse response = client.execute(post);
+        HttpEntity res = response.getEntity();
+        System.out.println(EntityUtils.toString(res));
+```
+以上代码等价于：
+
+```
+POST /api/queryAlertingByGroup
+{
+ "query":{"labels.project":["project1","project2"]},
+ group:["labels.project"]
+}
+```
+返回数据为：
+
+```
+{
+ "success":true,
+ "code":0,
+ "data":{
+  "list":[{
+    "count":1,
+    "labels-project":"project2"
+  },{
+    "count":1,
+    "labels-project":"project1"
+  }
+ ]
+}
+}
+```
 <h4 id="1.2">1.2历史告警查询</h4>
 历史告警信息查询，按照统一性原则，与当前告警查询格式一致，只不过数据来源有区别。当前告警数据来源于MongoDB数据库，历史告警数据来源于ElasticSearch。
 <h5 id="1.2.1">1.2.1.历史告警列表查询</h5>
