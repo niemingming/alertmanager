@@ -25,7 +25,8 @@ public class ApiTest {
 //        queryById();
 //        queryHistoryList();
 //        queryHistoryById();
-        searchHistoryList();
+//        searchHistoryList();
+        queryGroup();
 //        testgson();
     }
 
@@ -101,7 +102,7 @@ public class ApiTest {
                 .append("  query:{")
                 .append(" \"labels.project\":[\"project1\",\"project2\"]")
                 .append("  },")
-
+                .append(" group:[\"labels.job\"]")
                 .append("}");
         StringEntity stringEntity = new StringEntity(stringBuilder.toString());
         post.setEntity(stringEntity);

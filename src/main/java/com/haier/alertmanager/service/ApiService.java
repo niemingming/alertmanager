@@ -495,7 +495,7 @@ public class ApiService {
                 aggreData.add(row);
             }
             ((Map)result.getData()).clear();
-            ((Map)result.getData()).put("list",datas);
+            ((Map)result.getData()).put("list",aggreData);
             result.setCode(0);
             result.setSuccess(true);
         }catch (Exception e){

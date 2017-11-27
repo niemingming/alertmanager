@@ -36,6 +36,9 @@ public class AlertConfigurationProp {
     public String indexpre;
     /*ES配置文件地址*/
     public String esTemplateAddress;
+    /*消息通信地址*/
+    @Value("${alertmanager.notifyurl}")
+    public String messageUri;
 
     @Autowired
     private ElasticsearchConfiguration elasticsearchConfiguration;

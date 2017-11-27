@@ -1,15 +1,36 @@
 package com.haier.alertmanager.notifyhandlers;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.haier.alertmanager.configuration.AlertConfigurationProp;
 import com.haier.alertmanager.container.AlertRecordContainer;
 import com.haier.alertmanager.container.MessageReceiverContainer;
 import com.haier.alertmanager.model.AlertRecord;
 import com.haier.alertmanager.model.MessageReceiverInfo;
+import com.mongodb.DBObject;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.EntityBuilder;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -30,6 +51,9 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
     private MessageReceiverContainer messageReceiverContainer;
     /*通知重发时间间隔，单位秒*/
     private long resendinterval;
+    /*MongoDB数据库操作*/
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     /**
      * @description 初始化方法
@@ -67,21 +91,90 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
     }
 
     @Override
-    public void sendNotify(AlertRecord record) {
+    public synchronized void sendNotify(AlertRecord record) {
+        //修改了线程同步的，进入后重新校验上次通知时间，防止因发送间隔过短造成的消息重复发送
+        DBObject recordRes = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).findOne(record.toQuerySqlById());
+        record = new AlertRecord(recordRes);
         long now = new Date().getTime()/1000;
         if (record.getLastNotifyTime() == 0
                 || now - record.getLastNotifyTime() >= resendinterval
                 || record.getEndsAt() > record.getLastNotifyTime()){
             //将发送规则下沉到具体规则实现中，这里规则是当没有发送过通知，或者发送通知达到重发间隔时发送消息通知，或者消息结束时间大于上次通知时间，表示还没发送过。
-            //TODO 调用消息发送服务
             List<MessageReceiverInfo> messageReceiverInfos = messageReceiverContainer.getReceiversByRecord(record);
             if (messageReceiverInfos.isEmpty()) {
                 System.out.println("告警信息【" + record.getAlertname() + "】未配置消息接收者！");
             }else {
-                record.setLastNotifyTime(new Date().getTime()/1000);
-                alertRecordContainer.updateRecord(record);
-                System.out.println("服务已经发送");
+                //发送消息，先做成同步发送，看一下效果
+                HttpClient client = HttpClients.createDefault();
+                HttpPost post = new HttpPost(alertConfigurationProp.messageUri);
+                //设置访问超时时间
+                RequestConfig config = RequestConfig.custom().setConnectTimeout(10000)
+                        .setSocketTimeout(10000).setConnectionRequestTimeout(10000).build();
+                post.setConfig(config);
+                //获取所有请求人员
+                StringBuilder targets = new StringBuilder();
+                for (MessageReceiverInfo messageReceiverInfo:messageReceiverInfos){
+                    targets.append(messageReceiverInfo.getPersonId()).append(",");
+                }
+                if (targets.length() > 0){
+                    targets.delete(targets.length()-1,targets.length());
+                }
+                //构建参数
+                notifyParam param = new notifyParam();
+                param.subject = record.getLabels().get("project") + "" + record.getLabels().get("alertname") ;
+                param.content = record.getMessage();
+                param.targets = targets.toString();
+                try {
+                    post.setEntity(new UrlEncodedFormEntity(param.toParams(),"UTF-8"));
+                    //执行请求
+                    HttpResponse response = client.execute(post);
+                    String result = EntityUtils.toString(response.getEntity());
+                    JsonObject res = new Gson().fromJson(result,JsonObject.class);
+                    if (res.get("isSuccess").getAsBoolean()) {
+                        record.setLastNotifyTime(new Date().getTime()/1000);
+                        alertRecordContainer.updateRecord(record);
+                        System.out.println("消息已经发送");
+                    }else {
+                        System.out.println("消息发送失败！ "+ res.get("msg").getAsString());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("调用消息服务失败！");
+                }
             }
+        }
+
+    }
+    /**
+     * @description 告警通知参数类
+     * @date 2017/11/27
+     * @author Niemingming
+     */
+    public class notifyParam {
+        /*通知主题*/
+        public String subject;
+        /*通知目标*/
+        public String targets;
+        /*通知内容*/
+        public String content;
+        /*通知类型1：既发送邮件又发送iHaier消息*/
+        public int messageType = 1;
+        /**
+         * @description 返回post请求参数
+         * @date 2017/11/27
+         * @author Niemingming
+         */
+        public List<NameValuePair> toParams(){
+            List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+            NameValuePair subjectPair = new BasicNameValuePair("subject",subject);
+            NameValuePair contentPair = new BasicNameValuePair("content",content);
+            NameValuePair targetsPair = new BasicNameValuePair("targets",targets);
+            NameValuePair messageTypePair = new BasicNameValuePair("messageType",messageType+"");
+            pairs.add(subjectPair);
+            pairs.add(contentPair);
+            pairs.add(targetsPair);
+            pairs.add(messageTypePair);
+            return pairs;
         }
 
     }
