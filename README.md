@@ -23,8 +23,8 @@
 POST /api/queryAlertingList
 {
      pageinfo:{//分页信息如果不传，表示不分页
-         from:10, //从第几条开始，默认是0
-         size:10  //查询多少条，默认是10，
+         currentPage:10, //当前页码，从1开始
+         pageSize:10  //每页显示多少条，默认10条，
      },
      query:{//查询条件，遵循mongo的查询格式
           alertname:"testalert",
@@ -39,9 +39,18 @@ POST /api/queryAlertingList
  {
       success:bool(true/false),//表示是否成功
       code:0/1 ,//执行结果编码，目前只有0成功，1失败
-      total:long,//表示查询到的记录数
-      data:[], //表示返回的记录列表详情
-      hint:string //服务器返回的提示信息，一般在访问失败时给出。
+      data:{
+        page:{
+         total:4,
+         currentPage:1
+        },
+        list:[
+         {
+          startsAt:...
+         }
+        ]
+      }, //表示返回的记录列表详情
+      msg:string //服务器返回的提示信息，一般在访问失败时给出。
  }
  ```
  我们用httpClient来模拟post请求，尝试查询project=project1的数据。具体请求代码如下：
@@ -52,9 +61,10 @@ POST /api/queryAlertingList
  //不分页查询，列表查询为POST请求方式，条件为project=
  StringBuilder stringBuilder = new StringBuilder();
  stringBuilder.append("{")
+              .append("   pageinfo:{currentPage:1,pageSize:1},")
               .append("  query:{")
-              .append("   \"labels.project\":\"project1\"")
-              .append("  }")
+              .append(" \"labels.project\":[\"project1\",\"project2\"],") //支持in查询
+              .append("  }")
               .append("}");
  StringEntity stringEntity = new StringEntity(stringBuilder.toString());
  post.setEntity(stringEntity);
@@ -68,7 +78,8 @@ POST /api/queryAlertingList
 ```
 POST /api/queryAlertingList
 {
-  query:{
+ pageinfo:{currentPage:1,pageSize:1}
+ query:{
     "labels.project":"project1"
   }
 }
@@ -79,26 +90,33 @@ POST /api/queryAlertingList
 {
  "success":true,
  "code":0,
- "total":1,
- "data": [
-  {
+ "data":{
+  "page":{
+    "total":2,
+    "currentPage":1
+   },
+  "list":[{
    "_id":"247D78214DCCD7FE830EC039F2B310C4",
-   "startsAt":1511320572,
+   "startsAt":1511744837,
    "endsAt":-62135798400,
-   "lastNotifyTime":1511321273,
-   "lastReceiveTime":1511321307,
-   "times":8,
+   "lastNotifyTime":1511744957,
+   "lastReceiveTime":1511745022,
+   "times":38,
    "status":"firing",
-     "labels":{
-       "alertname":"mymetric11",
-       "group":"my1",
-       "instance":"localhost:8080",
-       "job":"tomcat",
-       "monitor":"codelab-monitor",
-       "project":"project1"
-     }
+   "level":"warning",
+   "alertId":"247D78214DCCD7FE830EC039F2B310C4-1511744837",
+   "message":"测试告警mymetric11\n不明原因，发生时间Mon Nov 27 09:07:17 CST 2017结束时间Sat Jan 01 00:00:00 CST 1",
+   "labels":{
+    "instance":"localhost:8080",
+    "alertname":"mymetric11",
+    "project":"project1",
+    "monitor":"codelab-monitor",
+    "job":"tomcat",
+    "group":"my1"
    }
-  ]
+  }
+ ]
+}
 }
 ```
 <h5 id="1.1.2">1.1.2.告警详情查询</h5>
@@ -116,7 +134,7 @@ GET /api/queryAlertingById/{id}//id为记录id
       code:0/1 ,//执行结果编码，目前只有0成功，1失败
       total:long,//表示查询到的记录数
       data:{}, //表示返回的记录详情信息
-      hint:string //服务器返回的提示信息，一般在访问失败时给出。
+      msg:string //服务器返回的提示信息，一般在访问失败时给出。
  }
  ```
 我们用httpClient来模拟GET请求，查询具体某一条告警信息详情,我们查询id为：247D78214DCCD7FE830EC039F2B310C4，代码如下：
@@ -169,9 +187,9 @@ GET /api/queryAlertingById/247D78214DCCD7FE830EC039F2B310C4
 POST /api/queryAlertList
 {
      pageinfo:{//分页信息如果不传，表示不分页
-         from:10, //从第几条开始，默认是0
-         size:10  //查询多少条，默认是10，
-     },
+         currentPage:10, //当前页码，从1开始
+         pageSize:10  //每页显示多少条，默认10条
+     },
      query:{//查询条件，遵循mongo的查询格式
           alertname:"testalert",
           "labels.job":"tomcat",
@@ -185,9 +203,14 @@ POST /api/queryAlertList
  {
       success:bool(true/false),//表示是否成功
       code:0/1 ,//执行结果编码，目前只有0成功，1失败
-      total:long,//表示查询到的记录数
-      data:[], //表示返回的记录列表详情
-      hint:string //服务器返回的提示信息，一般在访问失败时给出。
+      data:{
+       page:{
+        total:4,
+        currentPage:1
+       },
+       list:[]
+      }, //表示返回的记录列表详情
+      msg:string //服务器返回的提示信息，一般在访问失败时给出。
  }
  ```
  以下示例使用httpClient实现，查询times>10的历史记录，采用分页查询，查第一页数据。代码如下：
@@ -198,8 +221,9 @@ POST /api/queryAlertList
  //不分页查询，列表查询为POST请求方式，条件为project=
  StringBuilder stringBuilder = new StringBuilder();
  stringBuilder.append("{")
-              .append("   pageinfo:{from:0,size:1},")
+              .append("   pageinfo:{currentPage:1,pageSize:2},")
               .append("  query:{")
+              .append("  \"labels.project\":[\"project1\",\"project2\"],")
               .append("   times:{$gt:10}")
               .append("  }")
               .append("}");
@@ -215,10 +239,11 @@ POST /api/queryAlertList
  POST /api/queryHistoryList
  {
   pageinfo:{
-   from:0,
-   size:1
+   currentPage:1,
+   pageSize:1
   },
   query:{
+  "labels.project":["project1","project2"],
    times:{$gt:10}
   }
  }
@@ -229,28 +254,53 @@ POST /api/queryAlertList
  {
   "success":true,
   "code":0,
-  "total":27,
-  "data": [
-   {
-    "startsAt":1.511320572E9,
-    "endsAt":1.511330962E9,
-    "lastNotifyTime":1.511330952E9,
-    "lastReceiveTime":1.511330962E9,
-    "times":196.0,
+  "data":{
+   "page":{
+     "total":7,
+     "currentPage":1
+    },
+   "list":[{
+    "startsAt":1511744632,
+    "endsAt":1511744727,
+    "lastNotifyTime":1511744728,
+    "lastReceiveTime":1511744728,
+    "times":24,
     "status":"resolve",
+    "level":"warning",
+    "message":"测试告警mymetric11\n不明原因，发生时间Mon Nov 27 09:03:52 CST 2017结束时间Mon Nov 27 09:05:27 CST 2017",
     "labels":{
-      "alertname":"mymetric11",
-      "group":"my1",
       "instance":"localhost:8080",
-      "job":"tomcat",
+      "alertname":"mymetric11",
+      "project":"project2",
       "monitor":"codelab-monitor",
-      "project":"project1"
+      "job":"tomcat",
+      "group":"my1"
      },
-    "_index":"alert-201711",
-    "_id":"247D78214DCCD7FE830EC039F2B310C4-1511320572"
+     "_index":"alert-201711",
+     "_id":"FC6EF20EED02AA884745283049CDE2B2-1511744632"
+    },{
+     "startsAt":1511744632,
+     "endsAt":1511744727,
+     "lastNotifyTime":1511744727,
+     "lastReceiveTime":1511744727,
+     "times":24,
+     "status":"resolve",
+     "level":"warning",
+     "message":"测试告警mymetric11\n不明原因，发生时间Mon Nov 27 09:03:52 CST 2017结束时间Mon Nov 27 09:05:27 CST 2017",
+     "labels":{
+       "instance":"localhost:8080",
+       "alertname":"mymetric11",
+       "project":"project1",
+       "monitor":"codelab-monitor",
+       "job":"tomcat",
+       "group":"my1"
+      },
+      "_index":"alert-201711",
+      "_id":"247D78214DCCD7FE830EC039F2B310C4-1511744632"
+     }
+    ]
    }
- ]
-}
+  }
  ```
 <h5 id="1.2.2">1.2.2.历史告警详情查询</h5>
 查询格式
@@ -266,7 +316,7 @@ GET /queryAlertingById/{id}//id为记录id
       code:0/1 ,//执行结果编码，目前只有0成功，1失败
       total:long,//表示查询到的记录数
       data:{}, //表示返回的记录详情信息
-      hint:string //服务器返回的提示信息，一般在访问失败时给出。
+      msg:string //服务器返回的提示信息，一般在访问失败时给出。
  }
  ```
  我们使用httpclient模拟GET请求，查询指定id的历史数据详情，代码如下：
@@ -274,7 +324,7 @@ GET /queryAlertingById/{id}//id为记录id
  ```
   HttpClient client = HttpClients.createDefault();
   HttpGet get = 
-     new HttpGet("http://localhost:8081/api/queryHistoryById/alert-201711/247D78214DCCD7FE830EC039F2B310C4-1511320572");
+     new HttpGet("http://localhost:8081/api/queryHistoryById/alert-201711/FC6EF20EED02AA884745283049CDE2B2-1511744632");
   HttpResponse response = client.execute(get);
   HttpEntity res = response.getEntity();
   System.out.println(EntityUtils.toString(res));
@@ -282,7 +332,7 @@ GET /queryAlertingById/{id}//id为记录id
  以上代码等价于：
  
  ```
- GET /api/queryHistoryById/alert-201711/247D78214DCCD7FE830EC039F2B310C4-1511320572
+ GET /api/queryHistoryById/alert-201711/FC6EF20EED02AA884745283049CDE2B2-1511744632
  ```
  返回的数据格式为：
  
@@ -290,26 +340,27 @@ GET /queryAlertingById/{id}//id为记录id
  {
   "success":true,
   "code":0,
-  "total":1,
   "data":{
-   "startsAt":1.511320572E9,
-   "endsAt":1.511330962E9,
-   "lastNotifyTime":1.511330952E9,
-   "lastReceiveTime":1.511330962E9,
-   "times":196.0,
+   "startsAt":1511744632,
+   "endsAt":1511744727,
+   "lastNotifyTime":1511744728,
+   "lastReceiveTime":1511744728,
+   "times":24,
    "status":"resolve",
+   "level":"warning",
+   "message":"测试告警mymetric11\n不明原因，发生时间Mon Nov 27 09:03:52 CST 2017结束时间Mon Nov 27 09:05:27 CST 2017",
    "labels":{
-     "alertname":"mymetric11",
-     "group":"my1",
-     "instance":"localhost:8080",
-     "job":"tomcat",
-     "monitor":"codelab-monitor",
-     "project":"project1"
+    "instance":"localhost:8080",
+    "alertname":"mymetric11",
+    "project":"project2",
+    "monitor":"codelab-monitor",
+    "job":"tomcat",
+    "group":"my1"
    },
-  "_index":"alert-201711",
-  "_id":"247D78214DCCD7FE830EC039F2B310C4-1511320572"
+   "_index":"alert-201711",
+   "_id":"FC6EF20EED02AA884745283049CDE2B2-1511744632"
+  }
  }
-}
  ```
  <h5 id="1.2.3">1.2.3.历史告警搜索</h5>
  历史告警搜索是指，根据输入的关键字查询与之相关的历史告警数据，返回符合条件的前10条记录。访问的数据格式为：
@@ -323,8 +374,12 @@ GET /queryAlertingById/{id}//id为记录id
  {
       success:bool(true/false),//表示是否成功
       code:0/1 ,//执行结果编码，目前只有0成功，1失败
-      total:long,//表示查询到的记录数
-      data:[], //表示返回的记录列表详情
+      data:{
+       page:{
+        total:4
+       } ,
+       list:[]
+      }, //表示返回的记录列表详情
       hint:string //服务器返回的提示信息，一般在访问失败时给出。
  }
  ```
@@ -348,28 +403,34 @@ GET /queryAlertingById/{id}//id为记录id
  {
   "success":true,
   "code":0,
-  "total":42,
-  "data":[
-   {
-    "startsAt":1.511320572E9,
-    "endsAt":1.511330962E9,
-    "lastNotifyTime":1.511330952E9,
-    "lastReceiveTime":1.511330962E9,
-    "times":196.0,
-    "status":"resolve",
-    "labels":{
-      "alertname":"mymetric11",
-      "group":"my1",
-      "instance":"localhost:8080",
-      "job":"tomcat",
-      "monitor":"codelab-monitor",
-      "project":"project1"
-    },
+  "data":{
+   "page":{
+     "total":32
+   },
+  "list":[{
+   "startsAt":1511744632,
+   "endsAt":1511744727,
+   "lastNotifyTime":1511744728,
+   "lastReceiveTime":1511744728,
+   "times":24,
+   "status":"resolve",
+   "level":"warning",
+   "message":"测试告警mymetric11\n不明原因，发生时间Mon Nov 27 09:03:52 CST 2017结束时间Mon Nov 27 09:05:27 CST 2017",
+   "labels":{
+    "instance":"localhost:8080",
+    "alertname":"mymetric11",
+    "project":"project2",
+    "monitor":"codelab-monitor",
+    "job":"tomcat",
+    "group":"my1"
+   },
    "_index":"alert-201711",
-   "_id":"247D78214DCCD7FE830EC039F2B310C4-1511320572"
+   "_id":"FC6EF20EED02AA884745283049CDE2B2-1511744632"
   },
-  ···
- ]
+  ·····
+ }
+]
+}
 }
 ```
 <h3 id="2">2.系统配置</h3>
