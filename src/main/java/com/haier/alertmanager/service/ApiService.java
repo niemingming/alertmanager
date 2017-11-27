@@ -18,15 +18,15 @@ import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -602,8 +602,8 @@ public class ApiService {
         String endPoint = "/_template/alert_template";
         DefaultResourceLoader loader = new DefaultResourceLoader();
         try {
-            File file = loader.getResource(alertConfigurationProp.esTemplateAddress).getFile();
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+            Resource resource = loader.getResource(alertConfigurationProp.esTemplateAddress);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
             StringBuilder mapping = new StringBuilder();
             String str = null;
             while ((str = bufferedReader.readLine()) != null){

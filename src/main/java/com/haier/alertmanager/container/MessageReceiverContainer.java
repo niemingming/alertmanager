@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +41,7 @@ public class MessageReceiverContainer {
         Resource resource = defaultResourceLoader.getResource(AlertConstVariable.MESSAGE_RECEIVER_LIST);
         if (resource != null) {
             try {
-                BufferedReader bufferedReader = new BufferedReader(new FileReader(resource.getFile()));
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
                 String line = null;
                 Gson gson = new Gson();
                 while ((line = bufferedReader.readLine()) != null) {
