@@ -25,10 +25,10 @@ public class ApiTest {
 //        queryById();
 //        queryHistoryList();
 //        queryHistoryById();
-//        searchHistoryList();
+        searchHistoryList();
 //        queryGroup();
 //        testgson();
-        queryLevelCode();
+//        queryLevelCode();
     }
 
 
@@ -38,9 +38,9 @@ public class ApiTest {
         //不分页查询，列表查询为POST请求方式，条件为project=
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{")
-                .append("   pageinfo:{currentPage:1,pageSize:2},")
+                .append("   pageinfo:{currentPage:1,pageSize:1},")
                 .append("  query:{")
-                .append(" \"labels.project\":[\"project1\",\"project2\"],")
+                .append(" \"project\":[\"project1\",\"project2\"],")
                 .append("   \"times\":{$gt:1}")
                 .append("  }")
                 .append("}");
@@ -67,7 +67,7 @@ public class ApiTest {
         stringBuilder.append("{")
                 .append("   pageinfo:{currentPage:1,pageSize:2},")
                 .append("  query:{")
-                .append("  \"labels.project\":[\"project1\",\"project2\"],")
+                .append("  \"project\":[\"project1\",\"project2\"],")
                 .append("   times:{$gt:10}")
                 .append("  }")
                 .append("}");
@@ -80,7 +80,7 @@ public class ApiTest {
 
     public static void queryHistoryById() throws IOException {
         HttpClient client = HttpClients.createDefault();
-        HttpGet get = new HttpGet("http://localhost:8081/api/queryHistoryById/alert-201711/FC6EF20EED02AA884745283049CDE2B2-1511744632");
+        HttpGet get = new HttpGet("http://localhost:8081/api/queryHistoryById/alert-201711/FC6EF20EED02AA884745283049CDE2B2-1511772777");
         HttpResponse response = client.execute(get);
         HttpEntity res = response.getEntity();
         System.out.println(EntityUtils.toString(res));
@@ -101,9 +101,9 @@ public class ApiTest {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{")
                 .append("  query:{")
-                .append(" \"labels.project\":[\"project1\",\"project2\"]")
+                .append(" \"project\":[\"project1\",\"project2\"]")
                 .append("  },")
-                .append(" group:[\"labels.job\"]")
+                .append(" group:[\"project\"]")
                 .append("}");
         StringEntity stringEntity = new StringEntity(stringBuilder.toString());
         post.setEntity(stringEntity);
@@ -114,7 +114,7 @@ public class ApiTest {
 
     public static void queryLevelCode() throws IOException {
         HttpClient client = HttpClients.createDefault();
-        HttpGet get = new HttpGet("http://localhost:8081/api/queryAlertLevels");
+        HttpGet get = new HttpGet("http://10.138.16.192:8080/api/queryAlertLevels");
         HttpResponse response = client.execute(get);
         HttpEntity res = response.getEntity();
         System.out.println(EntityUtils.toString(res));
