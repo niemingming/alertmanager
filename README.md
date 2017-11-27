@@ -66,7 +66,7 @@ POST /api/queryAlertingList
  stringBuilder.append("{")
               .append("   pageinfo:{currentPage:1,pageSize:1},")
               .append("  query:{")
-              .append(" \"labels.project\":[\"project1\",\"project2\"],") //支持in查询
+              .append(" \"project\":[\"project1\",\"project2\"],") //支持in查询
               .append("  }")
               .append("}");
  StringEntity stringEntity = new StringEntity(stringBuilder.toString());
@@ -83,7 +83,7 @@ POST /api/queryAlertingList
 {
  pageinfo:{currentPage:1,pageSize:1}
  query:{
-    "labels.project":"project1"
+    "project":["project1","project2"]
   }
 }
 ```
@@ -99,27 +99,26 @@ POST /api/queryAlertingList
     "currentPage":1
    },
   "list":[{
-   "_id":"247D78214DCCD7FE830EC039F2B310C4",
-   "startsAt":1511744837,
+   "_id":"FC6EF20EED02AA884745283049CDE2B2",
+   "startsAt":1511778207,
    "endsAt":-62135798400,
-   "lastNotifyTime":1511744957,
-   "lastReceiveTime":1511745022,
-   "times":38,
+   "lastNotifyTime":1511778214,
+   "lastReceiveTime":1511778292,
+   "times":18,
    "status":"firing",
    "level":"warning",
-   "alertId":"247D78214DCCD7FE830EC039F2B310C4-1511744837",
-   "message":"测试告警mymetric11\n不明原因，发生时间Mon Nov 27 09:07:17 CST 2017结束时间Sat Jan 01 00:00:00 CST 1",
+   "alertId":"FC6EF20EED02AA884745283049CDE2B2-1511778207",
+   "project":"project2",
+   "alertname":"mymetric11",
    "labels":{
     "instance":"localhost:8080",
-    "alertname":"mymetric11",
-    "project":"project1",
     "monitor":"codelab-monitor",
     "job":"tomcat",
     "group":"my1"
+    }
    }
-  }
- ]
-}
+  ]
+ }
 }
 ```
 <h5 id="1.1.2">1.1.2.告警详情查询</h5>
@@ -160,22 +159,23 @@ GET /api/queryAlertingById/247D78214DCCD7FE830EC039F2B310C4
 {
  "success":true,
  "code":0,
- "total":1,
- "data": {
+ "data":{
   "_id":"247D78214DCCD7FE830EC039F2B310C4",
-  "startsAt":1511320572,
+  "startsAt":1511778207,
   "endsAt":-62135798400,
-  "lastNotifyTime":1511322357,
-  "lastReceiveTime":1511322362,
-  "times":219,
+  "lastNotifyTime":1511778350,
+  "lastReceiveTime":1511778427,
+  "times":44,
   "status":"firing",
+  "level":"warning",
+  "alertId":"247D78214DCCD7FE830EC039F2B310C4-1511778207",
+  "project":"project1",
+  "alertname":"mymetric11",
   "labels":{
-   "alertname":"mymetric11",
-   "group":"my1",
    "instance":"localhost:8080",
-   "job":"tomcat",
    "monitor":"codelab-monitor",
-   "project":"project1"
+   "job":"tomcat",
+   "group":"my1"
   }
  }
 }
@@ -192,7 +192,7 @@ GET /api/queryAlertingById/247D78214DCCD7FE830EC039F2B310C4
      *          "labels.job":"tomcat",
      *          times:{$gte:"10"}
      *     },
-     *     group:["level","labels.project"]//可以按照多个字段，也可以按照一个字段
+     *     group:["level","project"]//可以按照多个字段，也可以按照一个字段
      * }
      
 ```
@@ -215,9 +215,9 @@ GET /api/queryAlertingById/247D78214DCCD7FE830EC039F2B310C4
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{")
                 .append("  query:{")
-                .append(" \"labels.project\":[\"project1\",\"project2\"]")
+                .append(" \"project\":[\"project1\",\"project2\"]")
                 .append("  },")
-                .append(" group:[\"labels.project\"]")
+                .append(" group:[\"project\"]")
                 .append("}");
         StringEntity stringEntity = new StringEntity(stringBuilder.toString());
         post.setEntity(stringEntity);
@@ -230,8 +230,8 @@ GET /api/queryAlertingById/247D78214DCCD7FE830EC039F2B310C4
 ```
 POST /api/queryAlertingByGroup
 {
- "query":{"labels.project":["project1","project2"]},
- group:["labels.project"]
+ "query":{"project":["project1","project2"]},
+ group:["project"]
 }
 ```
 返回数据为：
@@ -242,11 +242,11 @@ POST /api/queryAlertingByGroup
  "code":0,
  "data":{
   "list":[{
-    "count":1,
-    "labels-project":"project2"
+   "count":1,
+   "project":"project1"
   },{
-    "count":1,
-    "labels-project":"project1"
+   "count":1,
+   "project":"project2"
   }
  ]
 }
@@ -258,7 +258,7 @@ POST /api/queryAlertingByGroup
 查询格式
 
 ```
-POST /api/queryAlertList
+POST /api/queryHistoryList
 {
      pageinfo:{//分页信息如果不传，表示不分页
          currentPage:10, //当前页码，从1开始
@@ -297,7 +297,7 @@ POST /api/queryAlertList
  stringBuilder.append("{")
               .append("   pageinfo:{currentPage:1,pageSize:2},")
               .append("  query:{")
-              .append("  \"labels.project\":[\"project1\",\"project2\"],")
+              .append("  \"project\":[\"project1\",\"project2\"],")
               .append("   times:{$gt:10}")
               .append("  }")
               .append("}");
@@ -317,7 +317,7 @@ POST /api/queryAlertList
    pageSize:1
   },
   query:{
-  "labels.project":["project1","project2"],
+  "project":["project1","project2"],
    times:{$gt:10}
   }
  }
@@ -330,51 +330,49 @@ POST /api/queryAlertList
   "code":0,
   "data":{
    "page":{
-     "total":7,
-     "currentPage":1
-    },
+    "total":4,
+    "currentPage":1
+   },
    "list":[{
-    "startsAt":1511744632,
-    "endsAt":1511744727,
-    "lastNotifyTime":1511744728,
-    "lastReceiveTime":1511744728,
-    "times":24,
+    "startsAt":1511772777,
+    "endsAt":1511778097,
+    "lastNotifyTime":1511774254,
+    "lastReceiveTime":1511778097,
+    "times":473,
     "status":"resolve",
     "level":"warning",
-    "message":"测试告警mymetric11\n不明原因，发生时间Mon Nov 27 09:03:52 CST 2017结束时间Mon Nov 27 09:05:27 CST 2017",
+    "project":"project1",
+    "alertname":"mymetric11",
     "labels":{
-      "instance":"localhost:8080",
-      "alertname":"mymetric11",
-      "project":"project2",
-      "monitor":"codelab-monitor",
-      "job":"tomcat",
-      "group":"my1"
-     },
-     "_index":"alert-201711",
-     "_id":"FC6EF20EED02AA884745283049CDE2B2-1511744632"
-    },{
-     "startsAt":1511744632,
-     "endsAt":1511744727,
-     "lastNotifyTime":1511744727,
-     "lastReceiveTime":1511744727,
-     "times":24,
-     "status":"resolve",
-     "level":"warning",
-     "message":"测试告警mymetric11\n不明原因，发生时间Mon Nov 27 09:03:52 CST 2017结束时间Mon Nov 27 09:05:27 CST 2017",
-     "labels":{
-       "instance":"localhost:8080",
-       "alertname":"mymetric11",
-       "project":"project1",
-       "monitor":"codelab-monitor",
-       "job":"tomcat",
-       "group":"my1"
-      },
-      "_index":"alert-201711",
-      "_id":"247D78214DCCD7FE830EC039F2B310C4-1511744632"
-     }
-    ]
+     "instance":"localhost:8080",
+     "monitor":"codelab-monitor",
+     "job":"tomcat",
+     "group":"my1"
+    },
+    "_index":"alert-201711",
+    "_id":"247D78214DCCD7FE830EC039F2B310C4-1511772777"
+   },{
+    "startsAt":1511772777,
+    "endsAt":1511778097,
+    "lastNotifyTime":1511774239,
+    "lastReceiveTime":1511778107,
+    "times":470,
+    "status":"resolve",
+    "level":"warning",
+    "project":"project2",
+    "alertname":"mymetric11",
+    "labels":{
+     "instance":"localhost:8080",
+     "monitor":"codelab-monitor",
+     "job":"tomcat",
+     "group":"my1"
+    },
+    "_index":"alert-201711",
+    "_id":"FC6EF20EED02AA884745283049CDE2B2-1511772777"
    }
-  }
+  ]
+ }
+}
  ```
 <h5 id="1.2.2">1.2.2.历史告警详情查询</h5>
 查询格式
@@ -398,7 +396,7 @@ GET /queryAlertingById/{id}//id为记录id
  ```
   HttpClient client = HttpClients.createDefault();
   HttpGet get = 
-     new HttpGet("http://localhost:8081/api/queryHistoryById/alert-201711/FC6EF20EED02AA884745283049CDE2B2-1511744632");
+     new HttpGet("http://localhost:8081/api/queryHistoryById/alert-201711/FC6EF20EED02AA884745283049CDE2B2-1511772777");
   HttpResponse response = client.execute(get);
   HttpEntity res = response.getEntity();
   System.out.println(EntityUtils.toString(res));
@@ -406,33 +404,31 @@ GET /queryAlertingById/{id}//id为记录id
  以上代码等价于：
  
  ```
- GET /api/queryHistoryById/alert-201711/FC6EF20EED02AA884745283049CDE2B2-1511744632
+ GET /api/queryHistoryById/alert-201711/FC6EF20EED02AA884745283049CDE2B2-1511772777
  ```
  返回的数据格式为：
  
  ```
  {
   "success":true,
-  "code":0,
-  "data":{
-   "startsAt":1511744632,
-   "endsAt":1511744727,
-   "lastNotifyTime":1511744728,
-   "lastReceiveTime":1511744728,
-   "times":24,
+  "code":0,"data":{
+   "startsAt":1511772777,
+   "endsAt":1511778097,
+   "lastNotifyTime":1511774239,
+   "lastReceiveTime":1511778107,
+   "times":470,
    "status":"resolve",
    "level":"warning",
-   "message":"测试告警mymetric11\n不明原因，发生时间Mon Nov 27 09:03:52 CST 2017结束时间Mon Nov 27 09:05:27 CST 2017",
+   "project":"project2",
+   "alertname":"mymetric11",
    "labels":{
     "instance":"localhost:8080",
-    "alertname":"mymetric11",
-    "project":"project2",
     "monitor":"codelab-monitor",
     "job":"tomcat",
     "group":"my1"
    },
    "_index":"alert-201711",
-   "_id":"FC6EF20EED02AA884745283049CDE2B2-1511744632"
+   "_id":"FC6EF20EED02AA884745283049CDE2B2-1511772777"
   }
  }
  ```
@@ -481,31 +477,6 @@ GET /queryAlertingById/{id}//id为记录id
    "page":{
      "total":32
    },
-  "list":[{
-   "startsAt":1511744632,
-   "endsAt":1511744727,
-   "lastNotifyTime":1511744728,
-   "lastReceiveTime":1511744728,
-   "times":24,
-   "status":"resolve",
-   "level":"warning",
-   "message":"测试告警mymetric11\n不明原因，发生时间Mon Nov 27 09:03:52 CST 2017结束时间Mon Nov 27 09:05:27 CST 2017",
-   "labels":{
-    "instance":"localhost:8080",
-    "alertname":"mymetric11",
-    "project":"project2",
-    "monitor":"codelab-monitor",
-    "job":"tomcat",
-    "group":"my1"
-   },
-   "_index":"alert-201711",
-   "_id":"FC6EF20EED02AA884745283049CDE2B2-1511744632"
-  },
-  ·····
- }
-]
-}
-}
 ```
 <h4 id="1.3">1.3公共编码查询</h4>
 查询告警板中用到的公共编码。
@@ -546,12 +517,32 @@ GET /api/queryAlertLevels
  "success":true,
  "code":0,
  "data":{
-   "error":"紧急",
-   "warn":"严重",
-   "info":"一般",
-   "debug":"提示"
-  }
+  "page":{
+    "total":44
+   },
+   "list":[{
+    "startsAt":1511772777,
+    "endsAt":1511778097,
+    "lastNotifyTime":1511774254,
+    "lastReceiveTime":1511778097,
+    "times":473,
+    "status":"resolve",
+    "level":"warning",
+    "project":"project1",
+    "alertname":"mymetric11",
+    "labels":{
+     "instance":"localhost:8080",
+     "monitor":"codelab-monitor",
+     "job":"tomcat",
+     "group":"my1"
+    },
+    "_index":"alert-201711",
+    "_id":"247D78214DCCD7FE830EC039F2B310C4-1511772777"
+   },
+   ···
+  ]
  }
+}
 ```
 <h3 id="2">2.系统配置</h3>
 <h4 id="2.1">2.1配置信息刷新</h4>
