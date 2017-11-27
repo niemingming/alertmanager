@@ -1,4 +1,8 @@
 package com.haier.alertmanager.model;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @description api调用结果实体抽象
  * @date 2017/11/21
@@ -12,9 +16,13 @@ public class ApiResult {
     /*返回数据*/
     private Object data;
     /*提示信息*/
-    private String hint;
-    /*总数*/
-    private long total;
+    private String msg;
+
+    public ApiResult(){
+        data = new HashMap();
+        Map page = new HashMap();
+        ((Map)data).put("page",page);
+    }
 
     public boolean isSuccess() {
         return success;
@@ -32,27 +40,28 @@ public class ApiResult {
         this.code = code;
     }
 
-    public Object getData() {
-        return data;
+    public String getMsg() {
+        return msg;
     }
 
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public Object getData() {
+        return data;
+
+    }
     public void setData(Object data) {
         this.data = data;
     }
 
-    public String getHint() {
-        return hint;
-    }
-
-    public void setHint(String hint) {
-        this.hint = hint;
-    }
-
-    public long getTotal() {
-        return total;
-    }
-
     public void setTotal(long total) {
-        this.total = total;
+        Map page = (Map) ((Map)data).get("page");
+        page.put("total",total);
+    }
+    public void setCurrentPage(long currentPage) {
+        Map page = (Map) ((Map)data).get("page");
+        page.put("currentPage",currentPage);
     }
 }

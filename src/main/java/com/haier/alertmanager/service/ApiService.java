@@ -2,7 +2,6 @@ package com.haier.alertmanager.service;
 
 import com.google.gson.*;
 import com.haier.alertmanager.configuration.AlertConfigurationProp;
-import com.haier.alertmanager.configuration.AlertConstVariable;
 import com.haier.alertmanager.container.AlertDictionaryContainer;
 import com.haier.alertmanager.container.AlertExcluseContainer;
 import com.haier.alertmanager.container.MessageReceiverContainer;
@@ -29,10 +28,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @description 对外提供调用的api服务
@@ -83,8 +79,8 @@ public class ApiService {
      * POST /api/queryAlertingList
      * {
      *     pageinfo:{//分页信息如果不传，表示不分页
-     *         from:10, //从第几条开始，默认是0
-     *         size:10  //查询多少条，默认是10，
+     *         currentPage:10, //当前第几页，从1开始
+     *         pageSize:10  //查询多少条，默认是10，
      *     },
      *     query:{//查询条件，遵循mongo的查询格式
      *          alertname:"testalert",
@@ -97,7 +93,13 @@ public class ApiService {
      *     success:bool(true/false),//表示是否成功
      *     code:0/1 ,//执行结果编码，目前只有0成功，1失败
      *     total:long,//表示查询到的记录数
-     *     data:[], //表示返回的记录列表详情
+     *     data:{
+     *         page:{
+     *             total:4,
+     *             currentPage:1
+     *         },
+     *         list:[]
+     *     }, //表示返回的记录列表详情
      *     hint:string //服务器返回的提示信息，一般在访问失败时给出。
      * }
      * @date 2017/11/21
@@ -106,26 +108,95 @@ public class ApiService {
     @ResponseBody
     @RequestMapping(value = "/queryAlertingList",method= RequestMethod.POST)
     public void queryAlertingList(HttpServletRequest request, HttpServletResponse response) {
-        StringBuilder queryCon = new StringBuilder();
         //调用结果信息
         ApiResult result = new ApiResult();
         Gson gson = new Gson();
         try {
-            //读取请求体中的查询条件。
-            BufferedReader reader = request.getReader();
+            DBObject qcon = readQueryCondition(request,result);
+            //出现异常后，退出，返回提示信息。
+            if (result.getMsg() != null){
+                writeOutData(response,result);
+                return;
+            }
+            //按照告警开始时间倒序
+            DBObject sort = new BasicDBObject("startsAt",-1);
+            long total = 0l;
+            //执行查询
+            DBCursor cursor = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).find(qcon).sort(sort);
+            //需要分页查询
+            long currentPage = 0;
+            JsonObject page = qcon.get("page") == null ? null : (JsonObject) qcon.removeField("page");
+            if (page != null){
+                total = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).count(qcon);
+                long size = page.get("pageSize") == null ? 10 : page.get("pageSize").getAsLong();
+                //根据当前第几页计算from
+                currentPage = page.get("currentPage") == null ? 0 : page.get("currentPage").getAsLong();
+                long from = (currentPage - 1)*size;
+                cursor.skip((int) from).limit((int) size);
+
+            }else {
+                total = cursor.size();
+            }
+            //搜集查询结果数据
+            List<Map> records = new ArrayList<Map>();
+            while (cursor.hasNext()){
+                records.add(cursor.next().toMap());
+            }
+            ((Map)result.getData()).put("list",records);
+            result.setSuccess(true);
+            result.setCode(0);
+            result.setTotal(total);
+            result.setCurrentPage(currentPage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("查询当前告警失败！");
+            result.setMsg("查询当前告警异常！");
+        }
+       writeOutData(response,result);
+    }
+
+    private DBObject readQueryCondition(HttpServletRequest request, ApiResult result) {
+        //读取请求体中的查询条件。
+        BufferedReader reader = null;
+        DBObject qcon = new BasicDBObject();
+        StringBuilder queryCon = new StringBuilder();
+        Gson gson = new Gson();
+        try {
+            reader = request.getReader();
             String str = null;
             while ((str = reader.readLine()) != null){
                 queryCon.append(str);
             }
             JsonObject page = null;
             JsonObject filter = new JsonObject();
-            //获取分页条件和过滤条件
+            JsonElement group = null;
+            //获取分页条件和过滤条件，增加分组条件。
             if (!"".equals(queryCon.toString())){
                 JsonObject query = gson.fromJson(queryCon.toString(),JsonObject.class);
                 page = query.get("pageinfo") == null ? null : (JsonObject) query.get("pageinfo");
+                qcon.put("page",page);
                 filter = query.get("query") == null ? new JsonObject() : (JsonObject) query.get("query");
+                group = query.get("group") == null ? null: query.get("group");
+                if (group != null){
+                    //如果是数组，表示按照多个字段分组
+                    Map groupFields = new HashMap();
+                    if (group.isJsonArray()){
+                        JsonArray gp = group.getAsJsonArray();
+                        for (int i = 0 ;i < gp.size(); i++){
+                            String fieldName = gp.get(i).getAsString();
+                            groupFields.put(fieldName.replace(".","-"),"$" + fieldName);
+                        }
+                    }else {//按照单个字段分组
+                        String fieldName = group.getAsString();
+                        groupFields.put(fieldName,"$" + fieldName);
+                    }
+                    //放入_id字段中
+                    Map _id = new HashMap();
+                    _id.put("_id",groupFields);
+                    //放入查询条件中返回。
+                    qcon.put("group",_id);
+                }
             }
-            DBObject qcon = new BasicDBObject();
             for (Map.Entry<String,JsonElement> entry:filter.entrySet()){
                 if (entry.getValue().isJsonObject()) {
                     for (Map.Entry<String,JsonElement> range:entry.getValue().getAsJsonObject().entrySet()){
@@ -155,36 +226,14 @@ public class ApiService {
                     qcon.put(entry.getKey(),entry.getValue().getAsString());
                 }
             }
-            //按照告警开始时间倒序
-            DBObject sort = new BasicDBObject("startsAt",-1);
-            long total = 0l;
-            //执行查询
-            DBCursor cursor = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).find(qcon).sort(sort);
-            //需要分页查询
-            if (page != null){
-                total = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).count(qcon);
-                long from = page.get("from") == null ? 0 : page.get("from").getAsLong();
-                long size = page.get("size") == null ? 10 : page.get("size").getAsLong();
-                cursor.skip((int) from).limit((int) size);
-            }else {
-                total = cursor.size();
-            }
-            //搜集查询结果数据
-            List<Map> records = new ArrayList<Map>();
-            while (cursor.hasNext()){
-                records.add(cursor.next().toMap());
-            }
-            result.setData(records);
-            result.setSuccess(true);
-            result.setCode(0);
-            result.setTotal(total);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("读取查询条件失败！");
-            result.setHint("读取查询条件异常！");
+            result.setMsg("读取查询条件异常！");
         }
-       writeOutData(response,result);
+        return qcon;
     }
+
     /**
      * @description 根据记录id查询告警详情
      * 请求方式：
@@ -193,7 +242,6 @@ public class ApiService {
      * {
      *     success:bool(true/false),//表示是否成功
      *     code:0/1 ,//执行结果编码，目前只有0成功，1失败
-     *     total:1,//表示查询到的记录数
      *     data:{}, //表示返回的记录详情
      *     hint:string //服务器返回的提示信息，一般在访问失败时给出。
      * }
@@ -208,12 +256,11 @@ public class ApiService {
         //根据id从当前告警表中查询告警详情
         DBObject queryRes = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).findOne(id);
         if (queryRes == null){
-            result.setHint("未找到id为【" + id + "】的告警记录！,请确定是否还在当前告警中！");
+            result.setMsg("未找到id为【" + id + "】的告警记录！,请确定是否还在当前告警中！");
         }else {
             result.setSuccess(true);
             result.setCode(0);
             result.setData(queryRes.toMap());
-            result.setTotal(1l);
         }
         writeOutData(response,result);
     }
@@ -223,8 +270,8 @@ public class ApiService {
      *POST /api/queryHistoryList
      * {
      *     pageinfo:{//分页信息如果不传，表示不分页
-     *         from:10, //从第几条开始，默认是0
-     *         size:10  //查询多少条，默认是10，
+     *         currentPage:10, //当前第几页，从1开始计数
+     *         pageSize:10  //查询多少条，默认是10，
      *     },
      *     query:{//查询条件，遵循mongo的查询格式
      *          alertname:"testalert",
@@ -237,7 +284,13 @@ public class ApiService {
      *     success:bool(true/false),//表示是否成功
      *     code:0/1 ,//执行结果编码，目前只有0成功，1失败
      *     total:long,//表示查询到的记录数
-     *     data:[], //表示返回的记录列表详情
+     *     data:{
+     *         page:{
+     *             total:4,
+     *             currentPage:1
+     *         },
+     *         list:[]
+     *     }, //表示返回的记录列表详情
      *     hint:string //服务器返回的提示信息，一般在访问失败时给出。
      * }
      *
@@ -263,14 +316,16 @@ public class ApiService {
             JsonObject page = null;
             JsonObject filter = new JsonObject();
             //获取分页条件和过滤条件
+            long currentPage = 0;
             if (!"".equals(queryCon.toString())) {
                 JsonObject query = gson.fromJson(queryCon.toString().replace("$",""), JsonObject.class);
                 page = query.get("pageinfo") == null ? null : (JsonObject) query.get("pageinfo");
                 filter = query.get("query") == null ? new JsonObject() : (JsonObject) query.get("query");
             }
             if (page != null){//带有分页条件时，设置分页数据
-                long from = page.get("from") == null ? 0 : page.get("from").getAsLong();
-                long size = page.get("size") == null ? 10000: page.get("size").getAsLong();
+                long size = page.get("pageSize") == null ? 10000: page.get("pageSize").getAsLong();
+                currentPage = page.get("currentPage") == null ? 0 : page.get("currentPage").getAsLong();
+                long from = (currentPage-1)*size;
                 esQueryObject.setFrom(from);
                 esQueryObject.setSize(size);
             }
@@ -283,10 +338,11 @@ public class ApiService {
             Header header = new BasicHeader("content-type","application/json");
             //请求ES查询历史数据
             Response queryResult = client.performRequest("GET","/_search",new HashMap<String,String>(),queryBody,header);
+            result.setCurrentPage(currentPage);
             dealWithHistoryList(result,queryResult);
         }catch (Exception e){
             e.printStackTrace();
-            result.setHint("查询历史数据出现异常！");
+            result.setMsg("查询历史数据出现异常！");
         }
         writeOutData(response,result);
     }
@@ -297,7 +353,6 @@ public class ApiService {
      * {
      *     success:bool(true/false),//表示是否成功
      *     code:0/1 ,//执行结果编码，目前只有0成功，1失败
-     *     total:long,//表示查询到的记录数
      *     data:{}, //表示返回的记录列表详情
      *     hint:string //服务器返回的提示信息，一般在访问失败时给出。
      * }
@@ -325,17 +380,16 @@ public class ApiService {
                 source.addProperty("_id",id);
                 result.setData(source);
                 result.setSuccess(true);
-                result.setTotal(1);
                 result.setCode(0);
             }else if (resultJson.keySet().contains("error")){
-                result.setHint("传入的index【" + index + "】不存在！");
+                result.setMsg("传入的index【" + index + "】不存在！");
             }else {
                 //未能从ES中查到
-                result.setHint("未能查询到id为【" + id + "】的历史告警数据！");
+                result.setMsg("未能查询到id为【" + id + "】的历史告警数据！");
             }
         } catch (IOException e) {
             e.printStackTrace();
-            result.setHint("查询历史数据出现异常！");
+            result.setMsg("查询历史数据出现异常！");
         }
         writeOutData(response,result);
     }
@@ -369,11 +423,88 @@ public class ApiService {
             dealWithHistoryList(result,queryResult);
         } catch (IOException e) {
             e.printStackTrace();
-            result.setHint("查询历史数据出现异常！");
+            result.setMsg("查询历史数据出现异常！");
         }
         //输出返回结果
         writeOutData(response,result);
     }
+    /**
+     * @description 提供按照某个指定字段分组查询功能POST请求
+     * POST /api/queryAlertingByGroup
+     * {
+     *     query:{//查询条件，遵循mongo的查询格式
+     *          alertname:"testalert",
+     *          "labels.job":"tomcat",
+     *          times:{$gte:"10"}
+     *     },
+     *     group:["level","labels.project"]//可以按照多个字段，也可以按照一个字段
+     * }
+     * 返回数据格式为：
+     * {
+     *     success:bool(true/false),//表示是否成功
+     *     code:0/1 ,//执行结果编码，目前只有0成功，1失败
+     *     data:{
+     *         page:{
+     *             total:4,
+     *             currentPage:1
+     *         },
+     *         list:[]
+     *     }, //表示返回的记录列表详情
+     * @date 2017/11/26
+     * @author Niemingming
+     */
+    @ResponseBody
+    @RequestMapping(value="/queryAlertingByGroup",method = RequestMethod.POST)
+    public void queryAlertingByGroup(HttpServletRequest request,HttpServletResponse response) {
+        //调用结果信息
+        ApiResult result = new ApiResult();
+        Gson gson = new Gson();
+        try {
+            DBObject qcon = readQueryCondition(request, result);
+            //出现异常后，退出，返回提示信息。
+            if (result.getMsg() != null) {
+                writeOutData(response, result);
+                return;
+            }
+            Map group = qcon.get("group") == null ? null : (Map) qcon.removeField("group");
+            List aggre = new ArrayList();
+            if (group == null){
+                result.setMsg("请传入要分组的字段名称！");
+            }else{
+                //增加统计项
+                group.put("count",new BasicDBObject("$sum",1));
+                qcon.removeField("page");//去掉分页信息
+                //有查询条件
+                if (qcon.keySet().size() > 0){
+                    aggre.add(new BasicDBObject("$match",qcon));
+                }
+                aggre.add(new BasicDBObject("$group",group));
+            }
+            //执行统计查询
+            Iterable<DBObject> datas = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).aggregate(aggre).results();
+            List aggreData = new ArrayList();
+            Iterator<DBObject> iterator = datas.iterator();
+            while (iterator.hasNext()) {
+                DBObject record = iterator.next();
+                DBObject _id = (DBObject) record.get("_id");
+                Map row= new HashMap();
+                for (Object key:_id.toMap().keySet()){
+                    row.put(key,_id.get(key.toString()));
+                }
+                row.put("count",record.get("count"));
+                aggreData.add(row);
+            }
+            ((Map)result.getData()).clear();
+            ((Map)result.getData()).put("list",datas);
+            result.setCode(0);
+            result.setSuccess(true);
+        }catch (Exception e){
+            e.printStackTrace();
+            result.setMsg("统计出现异常！");
+        }
+        writeOutData(response,result);
+    }
+
     /**
      * @description 输出返回结果
      * @date 2017/11/22
@@ -403,7 +534,7 @@ public class ApiService {
         JsonObject resultObj = gson.fromJson(resultJson,JsonObject.class);
         //分析查询结果,判断查询是否出错
         if (resultObj.get("error") != null) {
-            result.setHint("查询ES数据出现异常！");
+            result.setMsg("查询ES数据出现异常！");
         }else{
             JsonObject hits =  resultObj.get("hits").getAsJsonObject();
             //获取总数
@@ -422,7 +553,8 @@ public class ApiService {
             }
             result.setSuccess(true);
             result.setCode(0);
-            result.setData(data);
+            //修改列表的数据格式。
+            ((Map)result.getData()).put("list",data);
         }
     }
 

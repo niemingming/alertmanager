@@ -23,9 +23,9 @@ public class ApiTest {
     public static void main(String[]args) throws IOException {
 //        queryList();
 //        queryById();
-        queryHistoryList();
+//        queryHistoryList();
 //        queryHistoryById();
-//        searchHistoryList();
+        searchHistoryList();
 //        testgson();
     }
 
@@ -36,7 +36,7 @@ public class ApiTest {
         //不分页查询，列表查询为POST请求方式，条件为project=
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{")
-                .append("   pageinfo:{from:0,size:10},")
+                .append("   pageinfo:{currentPage:1,pageSize:2},")
                 .append("  query:{")
                 .append(" \"labels.project\":[\"project1\",\"project2\"],")
                 .append("   \"times\":{$gt:1}")
@@ -63,7 +63,7 @@ public class ApiTest {
         //不分页查询，列表查询为POST请求方式，条件为project=
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{")
-                .append("   pageinfo:{from:0,size:2},")
+                .append("   pageinfo:{currentPage:1,pageSize:2},")
                 .append("  query:{")
                 .append("  \"labels.project\":[\"project1\",\"project2\"],")
                 .append("   times:{$gt:10}")
@@ -78,7 +78,7 @@ public class ApiTest {
 
     public static void queryHistoryById() throws IOException {
         HttpClient client = HttpClients.createDefault();
-        HttpGet get = new HttpGet("http://localhost:8081/api/queryHistoryById/alert-201711/247D78214DCCD7FE830EC039F2B310C4-1511320572");
+        HttpGet get = new HttpGet("http://localhost:8081/api/queryHistoryById/alert-201711/FC6EF20EED02AA884745283049CDE2B2-1511744632");
         HttpResponse response = client.execute(get);
         HttpEntity res = response.getEntity();
         System.out.println(EntityUtils.toString(res));
@@ -88,6 +88,24 @@ public class ApiTest {
         HttpClient client = HttpClients.createDefault();
         HttpGet get = new HttpGet("http://localhost:8081/api/searchHistoryList/tomcat");
         HttpResponse response = client.execute(get);
+        HttpEntity res = response.getEntity();
+        System.out.println(EntityUtils.toString(res));
+    }
+
+    public  static  void queryGroup() throws IOException {
+        HttpClient client = HttpClients.createDefault();
+        HttpPost post = new HttpPost("http://localhost:8081/api/queryAlertingByGroup");
+        //不分页查询，列表查询为POST请求方式，条件为project=
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{")
+                .append("  query:{")
+                .append(" \"labels.project\":[\"project1\",\"project2\"]")
+                .append("  },")
+
+                .append("}");
+        StringEntity stringEntity = new StringEntity(stringBuilder.toString());
+        post.setEntity(stringEntity);
+        HttpResponse response = client.execute(post);
         HttpEntity res = response.getEntity();
         System.out.println(EntityUtils.toString(res));
     }
