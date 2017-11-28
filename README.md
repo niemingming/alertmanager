@@ -11,6 +11,9 @@
     * [1.2.3.历史告警搜索](#1.2.3)
   * [1.3.公共编码查询](#1.3)
     * [1.3.1.告警级别编码查询](#1.3.1)
+    * [1.3.2.告警分类编码查询](#1.3.2)
+    * [1.3.3.告警类型编码查询](#1.3.3)
+    * [1.3.4.告警编码查询](#1.3.4)
 * [2.系统配置](#2)
   * [2.1.配置信息刷新](#2.1)
   
@@ -541,6 +544,101 @@ GET /api/queryAlertLevels
    },
    ···
   ]
+ }
+}
+```
+<h5 id="1.3.2">1.3.2告警分类编码查询</h5>
+查询告警板配置的告警分类编码
+访问格式为：
+
+```
+GET /api/queryAlertCategories
+```
+返回数据为：
+
+```
+{
+ "success":true,
+ "code":0,
+ "data":{
+  "machine":"机器",
+  "app":"应用"
+ }
+}
+```
+<h5 id="1.3.3">1.3.3告警类型编码查询</h5>
+查询告警板配置的告警类型编码
+访问格式为：
+
+```
+GET /api/queryAlertTypes
+```
+返回数据为：
+
+```
+{
+ "success":true,
+ "code":0,
+ "data":{
+  "cockpit_schedule_task_exit":"容器实例退出",
+  "mysql_status_handlers_read_rnd":"mysql索引不合理",
+  "service_down":"服务不可用",
+  "node_reboot":"系统重启",
+  "node_cpu_pct_threshold_exceeded":"节点CPU使用率过高",
+  "node_mem_threshold_exceeded":"节点剩余内存不足",
+  "node_mem_pct_threshold_exceeded":"节点内存使用率过高",
+  "node_fs_pct_threshold_exceeded":"节点文件系统使用率过高",
+  "node_tcp_conn_toomuch":"节点TCP连接数过高",
+  "node_disk_io_util_threshold_exceeded":"节点磁盘IO过高",
+  "redis_service_down":"redis服务不可用",
+  "redis_mem_pct_threshold_exceeded":"Redis内存使用率过高",
+  "redis_mem_threshold_exceeded":"Redis内存不足",
+  "redis_toomany_command_executed":"Redis命令执行频繁",
+  "redis_dangerous_command_executed":"Redis执行危险命令"
+ }
+}
+```
+<h5 id="1.3.4">1.3.4告警编码查询</h5>
+查询告警板配置的所有告警编码
+访问格式为：
+
+```
+GET /api/queryAlertCode
+```
+返回的数据格式为：
+
+```
+{
+ "success":true,
+ "code":0,
+ "data":{
+  "alertType":{
+   "cockpit_schedule_task_exit":"容器实例退出",
+   "mysql_status_handlers_read_rnd":"mysql索引不合理",
+   "service_down":"服务不可用",
+   "node_reboot":"系统重启",
+   "node_cpu_pct_threshold_exceeded":"节点CPU使用率过高",
+   "node_mem_threshold_exceeded":"节点剩余内存不足",
+   "node_mem_pct_threshold_exceeded":"节点内存使用率过高",
+   "node_fs_pct_threshold_exceeded":"节点文件系统使用率过高",
+   "node_tcp_conn_toomuch":"节点TCP连接数过高",
+   "node_disk_io_util_threshold_exceeded":"节点磁盘IO过高",
+   "redis_service_down":"redis服务不可用",
+   "redis_mem_pct_threshold_exceeded":"Redis内存使用率过高",
+   "redis_mem_threshold_exceeded":"Redis内存不足",
+   "redis_toomany_command_executed":"Redis命令执行频繁",
+   "redis_dangerous_command_executed":"Redis执行危险命令"
+  },
+  "alertCategory":{
+   "machine":"机器",
+   "app":"应用"
+  },
+  "alertLevel":{
+   "error":"紧急",
+   "warn":"严重",
+   "info":"一般",
+   "debug":"提示"
+  }
  }
 }
 ```
