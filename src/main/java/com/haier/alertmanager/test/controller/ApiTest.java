@@ -25,10 +25,14 @@ public class ApiTest {
 //        queryById();
 //        queryHistoryList();
 //        queryHistoryById();
-        searchHistoryList();
+//        searchHistoryList();
 //        queryGroup();
 //        testgson();
 //        queryLevelCode();
+        queryCode("queryAlertLevels");
+        queryCode("queryAlertCategories");
+        queryCode("queryAlertTypes");
+        queryCode("queryAlertCode");
     }
 
 
@@ -115,6 +119,14 @@ public class ApiTest {
     public static void queryLevelCode() throws IOException {
         HttpClient client = HttpClients.createDefault();
         HttpGet get = new HttpGet("http://10.138.16.192:8080/api/queryAlertLevels");
+        HttpResponse response = client.execute(get);
+        HttpEntity res = response.getEntity();
+        System.out.println(EntityUtils.toString(res));
+    }
+
+    public static  void queryCode(String uri) throws IOException {
+        HttpClient client = HttpClients.createDefault();
+        HttpGet get = new HttpGet("http://localhost:8081/api/" + uri);
         HttpResponse response = client.execute(get);
         HttpEntity res = response.getEntity();
         System.out.println(EntityUtils.toString(res));

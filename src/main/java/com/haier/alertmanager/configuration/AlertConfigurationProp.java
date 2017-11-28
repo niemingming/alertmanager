@@ -45,7 +45,10 @@ public class AlertConfigurationProp {
     public AlertManagerCode alertManagerCode;
     /*告警级别*/
     public Map<String,String> alertlevel;
-
+    /*告警分类*/
+    public Map<String,String> alertCategory;
+    /*告警类型*/
+    public Map<String,String> alertType;
     @Autowired
     private ElasticsearchConfiguration elasticsearchConfiguration;
     @PostConstruct
@@ -56,6 +59,8 @@ public class AlertConfigurationProp {
         this.indexpre = elasticsearchConfiguration.getIndexpre();
         this.esTemplateAddress = elasticsearchConfiguration.getTemplate();
         this.alertlevel = alertManagerCode.getAlertlevel();
+        this.alertCategory = alertManagerCode.getAlertCategory();
+        this.alertType = alertManagerCode.getAlertType();
     }
 
 }

@@ -645,14 +645,118 @@ public class ApiService {
     @ResponseBody
     @RequestMapping("/queryAlertLevels")
     public void queryAlertLevels(HttpServletResponse response) {
+        writeCodeResult(alertConfigurationProp.alertlevel,response);
+    }
+
+    private void writeCodeResult(Object data,HttpServletResponse response){
         ApiResult result = new ApiResult();
-        Map levels = alertConfigurationProp.alertlevel;
-        result.setData(levels);
+        result.setData(data);
         result.setSuccess(true);
         result.setCode(0);
         writeOutData(response,result);
     }
+    /**
+     * @description 查询告警分类
+     * GET /api/queryAlertCategories
+     * 返回数据：
+     * {
+     *      success:true,
+     *      code:0/1,
+     *      data:{
+     *          machine:"机器",
+     *          app:"应用"
+     *      }
+     * }
+     * @date 2017/11/28
+     * @author Niemingming
+     */
+    @ResponseBody
+    @RequestMapping("/queryAlertCategories")
+    public void queryAlertCategoris(HttpServletResponse response){
+        writeCodeResult(alertConfigurationProp.alertCategory,response);
+    }
+    /**
+     * @description 查询告警类型
+     * GET /api/queryAlertTypes
+     * 返回数据：
+     * {
+     *      success:true,
+     *      code:0/1,
+     *      data:{
+     *         cockpit_schedule_task_exit: 容器实例退出,
+     *         mysql_status_handlers_read_rnd: mysql索引不合理,
+     *         service_down: 服务不可用,
+     *         node_reboot: 系统重启,
+     *         node_cpu_pct_threshold_exceeded: 节点CPU使用率过高,
+     *         node_mem_threshold_exceeded: 节点剩余内存不足,
+     *         node_mem_pct_threshold_exceeded: 节点内存使用率过高,
+     *         node_fs_pct_threshold_exceeded: 节点文件系统使用率过高,
+     *         node_tcp_conn_toomuch: 节点TCP连接数过高,
+     *         node_disk_io_util_threshold_exceeded: 节点磁盘IO过高,
+     *         redis_service_down: redis服务不可用,
+     *         redis_mem_pct_threshold_exceeded: Redis内存使用率过高,
+     *         redis_mem_threshold_exceeded: Redis内存不足,
+     *         redis_toomany_command_executed: Redis命令执行频繁,
+     *         redis_dangerous_command_executed: Redis执行危险命令
+     *      }
+     * }
+     * @date 2017/11/28
+     * @author Niemingming
+     */
+    @ResponseBody
+    @RequestMapping("/queryAlertTypes")
+    public void queryAlertTypes(HttpServletResponse response){
+        writeCodeResult(alertConfigurationProp.alertType,response);
+    }
 
+    /**
+     * @description 查询告警所有公共编码
+     * GET /api/queryAlertCode
+     * 返回数据：
+     * {
+     *      success:true,
+     *      code:0/1,
+     *      data:{
+     *      alertLevel:{
+     *          error:"紧急",
+     *          warn:"严重",
+     *          info:"一般",
+     *          debug:"提示"
+     *      },
+     *      alertCategory:{
+     *          machine:"机器",
+     *          app:"应用"
+     *      },
+     *      alertType:{
+     *         cockpit_schedule_task_exit: 容器实例退出,
+     *         mysql_status_handlers_read_rnd: mysql索引不合理,
+     *         service_down: 服务不可用,
+     *         node_reboot: 系统重启,
+     *         node_cpu_pct_threshold_exceeded: 节点CPU使用率过高,
+     *         node_mem_threshold_exceeded: 节点剩余内存不足,
+     *         node_mem_pct_threshold_exceeded: 节点内存使用率过高,
+     *         node_fs_pct_threshold_exceeded: 节点文件系统使用率过高,
+     *         node_tcp_conn_toomuch: 节点TCP连接数过高,
+     *         node_disk_io_util_threshold_exceeded: 节点磁盘IO过高,
+     *         redis_service_down: redis服务不可用,
+     *         redis_mem_pct_threshold_exceeded: Redis内存使用率过高,
+     *         redis_mem_threshold_exceeded: Redis内存不足,
+     *         redis_toomany_command_executed: Redis命令执行频繁,
+     *         redis_dangerous_command_executed: Redis执行危险命令
+     *      }
+     *      }
+     * }
+     * @date 2017/11/28
+     * @author Niemingming
+     */
+    @ResponseBody
+    @RequestMapping("/queryAlertCode")
+    public void queryAlertCode(HttpServletResponse response){
+        DBObject code = new BasicDBObject("alertType",alertConfigurationProp.alertType);
+        code.put("alertCategory",alertConfigurationProp.alertCategory);
+        code.put("alertLevel",alertConfigurationProp.alertlevel);
+        writeCodeResult(code.toMap(),response);
+    }
     /**
      * @description ES查询对象，用于生成ES的查询json数据
      * @date 2017/11/22
