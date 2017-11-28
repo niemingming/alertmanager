@@ -122,6 +122,7 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
                 param.subject = record.getProject() + "-" + record.getAlertname();
                 param.content = record.getMessage();
                 param.targets = targets;
+                param.id = record.getAlertId();
                 try {
                     //改为请求体格式
                     StringEntity entity = new StringEntity(new Gson().toJson(param),"utf-8");
@@ -160,6 +161,8 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
         public String content;
         /*通知类型1：既发送邮件又发送iHaier消息*/
         public int messageType = 1;
+        /*告警id*/
+        public String id;
         /**
          * @description 返回post请求参数
          * @date 2017/11/27
