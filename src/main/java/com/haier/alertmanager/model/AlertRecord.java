@@ -55,6 +55,10 @@ public class AlertRecord {
     private String alertCategory;
     /*项目名称*/
     private String project;
+    /*告警值*/
+    private Double value;
+    /*度量单位*/
+    private String unit;
     /**
      * @description 空函数的初始化操作，用于该类的一些方法
      * @date 2017/11/16
@@ -75,6 +79,16 @@ public class AlertRecord {
         lastReceiveTime = new Date().getTime()/1000;//精确到秒
         times = 1;
         status = AlertConstVariable.ALERT_STATUS_FIRING;//告警状态为触发状态
+        //读取注解信息，从里面尝试获取单位和告警值
+        JsonObject annotations = record.get("annotations") == null ? null:record.getAsJsonObject("annotations");
+        if (annotations != null){//有数据，尝试获取unit和value
+            if (annotations.get("unit") != null && annotations.get("unit").isJsonPrimitive()){
+                unit = annotations.get("unit").getAsString();
+            }
+            if (annotations.get("value") != null&& annotations.get("value").isJsonPrimitive()){
+                value = annotations.get("value").getAsDouble();
+            }
+        }
         Map labels = null;
         JsonObject jsonLabels =  record.get("labels") == null ? null :record.get("labels").getAsJsonObject();
         if (jsonLabels != null){
@@ -139,6 +153,8 @@ public class AlertRecord {
         description = record.get("description") + "";
         alertCategory = record.get("alertCategory") + "";
         message = description +"\n" + suggest;
+        value = record.get("value") == null ? null : (Double) record.removeField("value");
+        unit = record.get("unit") == null ? null : record.get("unit")+"";
         //形成labels字段，并计算id
         setLabels(record.get("labels") == null ? new HashMap() : (Map) record.get("labels"));
         id = mid;
@@ -229,6 +245,14 @@ public class AlertRecord {
         return labels;
     }
 
+    public double getValue() {
+        return value;
+    }
+
+    public void setValue(double value) {
+        this.value = value;
+    }
+
     public void setLabels(Map labels) {
         this.labels = labels;
         List<String> labelstr = new ArrayList<String>();
@@ -316,6 +340,18 @@ public class AlertRecord {
         this.alertId = alertId;
     }
 
+    public void setValue(Double value) {
+        this.value = value;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
     /**
      * @description 将属性值转为插入数据
      * @date 2017/11/16
@@ -337,6 +373,8 @@ public class AlertRecord {
         object.put("description",description);
         object.put("alertCategory",alertCategory);
         object.put("alertname",alertname);
+        object.put("value",value);
+        object.put("unit",unit);
         object.put("labels",this.labels);
         return object;
     }
@@ -389,6 +427,8 @@ public class AlertRecord {
                 ", suggest='" + suggest + '\'' +
                 ", alertCategory='" + alertCategory + '\'' +
                 ", project='" + project + '\'' +
+                ", value='" + value + '\'' +
+                ", unit='" + unit + '\'' +
                 '}';
     }
 }

@@ -46,11 +46,14 @@ public class ReceiverService {
         while((string = bufferedReader.readLine()) != null){
             alerts.append(string);
         }
-        //将告警信息转成json数据，并处理告警记录
-        JsonArray labels = gson.fromJson(alerts.toString(),JsonArray.class);
-        for (int i = 0; i < labels.size(); i++){
-            JsonObject alertRecord = labels.get(i).getAsJsonObject();
-            alertRecordContainer.addRecord(alertRecord);
+        //如果没有传入数据，我们返回状态信息
+        if(!"".equals(alerts.toString())){
+            //将告警信息转成json数据，并处理告警记录
+            JsonArray labels = gson.fromJson(alerts.toString(),JsonArray.class);
+            for (int i = 0; i < labels.size(); i++){
+                JsonObject alertRecord = labels.get(i).getAsJsonObject();
+                alertRecordContainer.addRecord(alertRecord);
+            }
         }
         //返回成功状态
         response.setHeader("Content-Type","application/json");

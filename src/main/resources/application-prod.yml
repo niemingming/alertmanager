@@ -31,8 +31,8 @@ alertmanager:
     indexpre: alert-
     #模板文件地址，根据ES版本设置
     template: "classpath:notifysend/esmapping5.x.json"
-  #notifyService endpoint
-  notifyurl: http://10.130.236.34:8080/api/notify/message
+  #notifyService endpoin
+  notifyurl: http://10.138..16.192:8888/api/notify/message?asynchronismType=1
   code:
     alertlevel:
       error: 紧急

@@ -98,6 +98,7 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
                 || record.getEndsAt() > record.getLastNotifyTime()){
             String message = alertDictionaryContainer.getNotifyMessage(record);
             record.setMessage(message);
+
             //将发送规则下沉到具体规则实现中，这里规则是当没有发送过通知，或者发送通知达到重发间隔时发送消息通知，或者消息结束时间大于上次通知时间，表示还没发送过。
             List<MessageReceiverInfo> messageReceiverInfos = messageReceiverContainer.getReceiversByRecord(record);
             if (messageReceiverInfos.isEmpty()) {
