@@ -22,6 +22,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -644,7 +645,13 @@ public class ApiService {
      */
     @ResponseBody
     @RequestMapping("/queryAlertLevels")
-    public void queryAlertLevels(HttpServletResponse response) {
+    public void queryAlertLevels(HttpServletRequest request,HttpServletResponse response) {
+        Cookie [] cookies = request.getCookies();
+        if (cookies != null){
+            for (Cookie cookie:cookies){
+                System.out.println(cookie.getName()+":" + cookie.getValue()+":" + cookie.getDomain());
+            }
+        }
         writeCodeResult(alertConfigurationProp.alertlevel,response);
     }
 

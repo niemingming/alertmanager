@@ -18,7 +18,7 @@ alertmanager:
   alertexcluse:
     tablename: alertExcluse
   #消息重发间隔时长单位为s:秒，m:分，h:时，d：天
-  resendinterval: 30m
+  resendinterval: 2m
   #ES主机和端口配置
   elasticsearch:
   #ES的主机端口配置，支持多台主机,

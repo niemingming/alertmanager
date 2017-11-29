@@ -76,6 +76,10 @@ public class AlertRecordContainer {
             record1.setTimes(tmp.getTimes()+1);
             record1.setLevel(tmp.getLevel());
             record1.setMessage(tmp.getMessage());
+            record1.setSuggest(tmp.getSuggest());
+            record1.setDescription(tmp.getDescription());
+            record1.setAlertCategory(tmp.getAlertCategory());
+            record1.setUnit(tmp.getUnit());
         }else {//数据库中没有的时候，先初始化提示信息
             String message = alertDictionaryContainer.getNotifyMessage(record1);
             record1.setMessage(message);
@@ -83,7 +87,6 @@ public class AlertRecordContainer {
         //如果没有结束时间，或者有但是需要更新时，执行更新操作。
         if (shouldexec){
             DBObject obj = record1.toSql();
-            BasicDBObject bb;
             //更新或者插入告警记录
             WriteResult writeResult = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).update(record1.toQuerySqlById(),obj,true,false);
             //发送消息通知
