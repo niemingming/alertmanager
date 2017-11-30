@@ -439,7 +439,7 @@ GET /queryAlertingById/{id}//id为记录id
  历史告警搜索是指，根据输入的关键字查询与之相关的历史告警数据，返回符合条件的前10条记录。访问的数据格式为：
  
  ```
- GET /api/searchHistoryList/{searchstr}
+ GET /api/searchHistoryList/{searchstr}?currentPage=1&pageSize=10
  ```
  返回的数据格式为：
  
@@ -449,7 +449,8 @@ GET /queryAlertingById/{id}//id为记录id
       code:0/1 ,//执行结果编码，目前只有0成功，1失败
       data:{
        page:{
-        total:4
+        total:4,
+        currentPage:1
        } ,
        list:[]
       }, //表示返回的记录列表详情
@@ -468,7 +469,8 @@ GET /queryAlertingById/{id}//id为记录id
  以上代码等价于：
  
  ```
- GET /api/searchHistoryList/tomcat
+ //如果不传currentPage和pageSize，系统会默认currentPage=1，pageSize=10
+ GET /api/searchHistoryList/tomcat?currentPage=1&pageSize=10
  ```
  返回的数据格式为：
  
@@ -478,7 +480,8 @@ GET /queryAlertingById/{id}//id为记录id
   "code":0,
   "data":{
    "page":{
-     "total":32
+     "total":32,
+     "currentPage":1
    },
 ```
 <h4 id="1.3">1.3公共编码查询</h4>
