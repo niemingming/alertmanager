@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,6 +79,7 @@ public class AlertDictionaryContainer {
         if (appedReason){
             templateStr.append("\n").append(alertDictionary.getSuggest());
         }
+        System.out.println(new Date());
         return simpleTemplate.decodeTemplate(templateStr.toString(),record.toMap());
     }
     /**
