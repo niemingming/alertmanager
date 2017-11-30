@@ -200,14 +200,16 @@ public class ApiService {
             }
             for (Map.Entry<String,JsonElement> entry:filter.entrySet()){
                 if (entry.getValue().isJsonObject()) {
+                    DBObject rangeObj = new BasicDBObject();//有可能有多个属性
                     for (Map.Entry<String,JsonElement> range:entry.getValue().getAsJsonObject().entrySet()){
                         JsonPrimitive jsonPrimitive = (JsonPrimitive) range.getValue();
                         if (jsonPrimitive.isNumber()) {
-                            qcon.put(entry.getKey(),new BasicDBObject(range.getKey(),range.getValue().getAsDouble()));
+                            rangeObj.put(range.getKey(),range.getValue().getAsDouble());
                         }else {
-                            qcon.put(entry.getKey(),new BasicDBObject(range.getKey(),range.getValue().getAsString()));
+                            rangeObj.put(range.getKey(),range.getValue().getAsString());
                         }
                     }
+                    qcon.put(entry.getKey(),rangeObj);
                 }else if (entry.getValue().isJsonArray()){
                     //如果是数组，表示in查询匹配多个
                     Map containsCon = new HashMap();
