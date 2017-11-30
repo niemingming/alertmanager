@@ -809,10 +809,12 @@ public class ApiService {
                 fieldr.put(field,value.toString());
                 if (value instanceof JsonObject){
                     JsonObject filter = (JsonObject) value;
+                    DBObject rangeObj = new BasicDBObject();
                     for (Map.Entry<String,JsonElement> entry: filter.entrySet()){
                         JsonPrimitive obj = (JsonPrimitive) entry.getValue();
-                        fieldr.put(field,new BasicDBObject(entry.getKey(),obj));
+                        rangeObj.put(entry.getKey(),obj);
                     }
+                    fieldr.put(field,rangeObj);
                     Map range = new HashMap();
                     range.put("range",fieldr);
                     filters.add(range);
