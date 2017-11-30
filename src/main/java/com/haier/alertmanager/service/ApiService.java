@@ -338,7 +338,7 @@ public class ApiService {
             queryBody.setContentType("application/json;charset=UTF-8");
             Header header = new BasicHeader("content-type","application/json");
             //请求ES查询历史数据
-            Response queryResult = client.performRequest("GET","/_search",new HashMap<String,String>(),queryBody,header);
+            Response queryResult = client.performRequest("POST","/alert-*/_search",new HashMap<String,String>(),queryBody,header);
             result.setCurrentPage(currentPage);
             dealWithHistoryList(result,queryResult);
         }catch (Exception e){
@@ -411,9 +411,12 @@ public class ApiService {
      */
     @ResponseBody
     @RequestMapping("/searchHistoryList/{searchstr}")
-    public void searchHistoryList(@PathVariable String searchstr,HttpServletResponse response) {
+    public void searchHistoryList(@PathVariable String searchstr,@RequestParam(value = "currentPage",defaultValue = "1") int currentPage,
+                                  @RequestParam(value = "pageSize",defaultValue = "10") int pageSize, HttpServletResponse response) {
+        int from = (currentPage - 1)*pageSize ;
+        int size = pageSize;
         //按照结束时间倒序排列
-        String endpoint = "/_search?q=" + searchstr + "&sort=endsAt:desc";
+        String endpoint = "/alert-*/_search?q=" + searchstr + "&sort=endsAt:desc&from=" + from + "&size=" + size;
         RestClient restClient = getRestClient();
         //创建返回结果信息对象
         ApiResult result = new ApiResult();
@@ -421,6 +424,7 @@ public class ApiService {
         Header header = new BasicHeader("content-type","application/json");
         try {
             Response queryResult = restClient.performRequest("GET",endpoint,header);
+            result.setCurrentPage(currentPage);
             dealWithHistoryList(result,queryResult);
         } catch (IOException e) {
             e.printStackTrace();
@@ -805,11 +809,7 @@ public class ApiService {
                     JsonObject filter = (JsonObject) value;
                     for (Map.Entry<String,JsonElement> entry: filter.entrySet()){
                         JsonPrimitive obj = (JsonPrimitive) entry.getValue();
-                        if (obj.isNumber()){
-                            fieldr.put(field,new BasicDBObject(entry.getKey(),obj.getAsDouble()));
-                        }else {
-                            fieldr.put(field,new BasicDBObject(entry.getKey(),obj.getAsString()));
-                        }
+                        fieldr.put(field,new BasicDBObject(entry.getKey(),obj));
                     }
                     Map range = new HashMap();
                     range.put("range",fieldr);
@@ -826,6 +826,7 @@ public class ApiService {
                             terms.add(jsonPrimitive.getAsString());
                         }
                     }
+//                    String  mstr = terms.toString();
                     fieldr.put(field,terms);
                     filters.add(new BasicDBObject("terms",fieldr).toMap());
                 }else if (value instanceof JsonPrimitive){//如果其他类型，表示是字符串,格式为{term:{field:value}}

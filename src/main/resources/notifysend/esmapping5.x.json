@@ -15,6 +15,12 @@
         "lastReceiveTime":{"type":"date","format":"epoch_second"},
         "times":{"type":"integer"},
         "status":{"type":"keyword"},
+        "alertname":{"type":"keyword"},
+        "project":{"type":"keyword"},
+        "unit":{"type":"keyword"},
+        "suggest":{"type":"keyword"},
+        "alertCategory":{"type":"keyword"},
+        "description":{"type":"string","index":"analyzed"},
         "message":{"type":"text"},
         "labels.*":{
           "type":"keyword"

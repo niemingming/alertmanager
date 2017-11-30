@@ -6,7 +6,6 @@ import com.haier.alertmanager.configuration.AlertConstVariable;
 import com.haier.alertmanager.model.AlertRecord;
 import com.haier.alertmanager.service.HistoryStoreService;
 import com.haier.alertmanager.service.NotifySendService;
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
