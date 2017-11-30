@@ -1,101 +1,113 @@
 #通知发送列表，分为3列，人员id，人员名称，匹配规则json字符串。一行对应一条通知规则，可以重复
-#01479820   聂明明 {alertname:"mymetric11"}
-01479820   聂明明 {alertname:"mymetric11"}
-01479820   聂明明 {alertname:"cockpit_schedule_task_exit"}
-#01479820   聂明明 {alertname:"mysql_status_handlers_read_rnd"}
-#01479820   聂明明 {alertname:"service_down"}
-#01479820   聂明明 {alertname:"node_reboot"}
-#01479820   聂明明 {alertname:"node_cpu_pct_threshold_exceeded"}
-#01479820   聂明明 {alertname:"node_mem_threshold_exceeded"}
-#01479820   聂明明 {alertname:"node_mem_pct_threshold_exceeded"}
-#01479820   聂明明 {alertname:"node_fs_pct_threshold_exceeded"}
-#01479820   聂明明 {alertname:"node_tcp_conn_toomuch"}
-#01479820   聂明明 {alertname:"node_disk_io_util_threshold_exceeded"}
-#01479820   聂明明 {alertname:"redis_service_down"}
-#01479820   聂明明 {alertname:"uoc_redis_mem_pct_threshold_exceeded"}
-#01479820   聂明明 {alertname:"redis_mem_pct_threshold_exceeded"}
-#01479820   聂明明 {alertname:"redis_mem_threshold_exceeded"}
-#01479820   聂明明 {alertname:"redis_toomany_command_executed"}
-#01479820   聂明明 {alertname:"redis_dangerous_command_executed"}
 #01462834    薛冰  {alertname:"mymetric11",job:"tomcat"}
+#redis,mysql,MONITOR-DEV,MONITOR-PROD
+01462834    薛冰  {project:"redis"}
+01462834    薛冰  {project:"mysql"}
+01462834    薛冰  {project:"MONITOR-DEV"}
+01462834    薛冰  {project:"MONITOR-PROD"}
 #01445511	于鸿磊	MONITOR-DEV,MONITOR-PROD
+01445511	于鸿磊  {project:"MONITOR-DEV"}
+01445511	于鸿磊  {project:"MONITOR-PROD"}
 #01452142	于志强	POINT,HDYBC,redis
+01452142	于志强  {project:"POINT"}
+01452142	于志强  {project:"HDYBC"}
+01452142	于志强  {project:"redis"}
 #01430959	徐金良	HDYBCFP,HAIDAYUAN,COSMOIM,PAAS-PROD,PAAS-DEV
+01430959	徐金良	{project:"HDYBCFP"}
+01430959	徐金良	{project:"HAIDAYUAN"}
+01430959	徐金良	{project:"COSMOIM"}
+01430959	徐金良	{project:"PAAS-PROD"}
+01430959	徐金良	{project:"PAAS-DEV"}
 #01431003	孙晓坤	TDP,BTBRRS
+01431003	孙晓坤	{project:"TDP"}
+01431003	孙晓坤	{project:"BTBRRS"}
 #01429102	班点点	HECO,PAAS-PROD,PAAS-DEV
+01429102	班点点	{project:"HECO"}
+01429102	班点点	{project:"PAAS-PROD"}
+01429102	班点点	{project:"PAAS-DEV"}
 #01426061	王雷鸣	CENTER
+01426061	王雷鸣	{project:"CENTER"}
 #01457141	王建坤	JHZX,WANGJIANKUN
+01457141	王建坤	{project:"JHZX"}
+01457141	王建坤	{project:"WANGJIANKUN"}
 #01460476	季相相	UOC
+01460476	季相相	{project:"UOC"}
 #01458316	毛芳	ADP
-#
+01458316	毛芳	{project:"ADP"}
 #
 #01461125	高殿翔-技术	ADP
+01461125	高殿翔-技术 {project:"ADP"}
 #01462541	UOC技术-姬哲	UOC
+01462541	UOC技术-姬哲	{project:"UOC"}
 #01303014	UOC技术-陈子琦	UOC
+01303014	UOC技术-陈子琦	{project:"UOC"}
 #01467848	李岚-技术	POINT
+01467848	李岚-技术  {project:"POINT"}
 #01188413	HDYBC技术-李丹	HDYBC
-#
+01188413	HDYBC技术-李丹	{project:"HDYBC"}
 #
 #01076632	HDYBCFP技术-常靓靓	HDYBCFP
+01076632	HDYBCFP技术-常靓靓	{project:"HDYBCFP"}
 #01430860	COSMOIM技术-姚彬	COSMOIM
+01430860	COSMOIM技术-姚彬	{project:"COSMOIM"}
+01197593	TDP技术/项目-王明超	{project:"TDP"}
+01075303	HECO技术-王海欧	{project:"HECO"}
 #
-#01197593	TDP技术/项目-王明超	TDP
-#01075303	HECO技术-王海欧	HECO
-#
-#01357690	HBDM技术-王贤秀	HBDM
+01357690	HBDM技术-王贤秀	{project:"HBDM"}
 
-#01436556	CENTER技术-黄超	CENTER
+01436556	CENTER技术-黄超	{project:"CENTER"}
 
-#00575591	HAIDAYUAN技术-许峰	HAIDAYUAN
-#01413497	HAIDAYUAN技术-李成	HAIDAYUAN
-#01455606	JHZX技术-赵华伟	JHZX
+00575591	HAIDAYUAN技术-许峰	{project:"HAIDAYUAN"}
+01413497	HAIDAYUAN技术-李成	{project:"HAIDAYUAN"}
+01455606	JHZX技术-赵华伟	{project:"JHZX"}
 
-#00025644	BTBRRS技术-路文超	BTBRRS
+00025644	BTBRRS技术-路文超	{project:"BTBRRS"}
 
 
-#00602213	DZSP-技术-侯宝原	DZSP
+00602213	DZSP-技术-侯宝原	{project:"DZSP"}
 
-#01457199	HAIERBTOB-技术-郭钥	HAIERBTOB
+01457199	HAIERBTOB-技术-郭钥	{project:"HAIERBTOB"}
 
-#01402638	HMMS-技术-张爱萍	HMMS,HMMSYJ
+01402638	HMMS-技术-张爱萍	{project:"HMMS"}
+01402638	HMMS-技术-张爱萍	{project:"HMMSYJ"}
 
-#01025569	HMQM-技术-盖晓雅	HMQM
+01025569	HMQM-技术-盖晓雅	{project:"HMQM"}
 
-#01303040	HOVAS-技术-马宏伟	HOVAS
+01303040	HOVAS-技术-马宏伟	{project:"HOVAS"}
 
-#01341720	WGXSPT-技术-卢瑾	WGXSPT
+01341720	WGXSPT-技术-卢瑾	{project:"WGXSPT"}
 
 
 
-#01419699	OEM技术-周陈	OEM
-#00594667	SOPPLAT技术-严惠	SOPPLAT
-#01419699	DFGL技术-周陈	DFGL
-#01188578	IOS技术-邳继武	IOS
-#01025569	MEC技术-盖晓雅	MEC
-#01025569	MKHL技术-盖晓雅	MKHL
-#00592038	CGSIS技术-李娣	CGSIS
-#01437224	HROIS技术-王学骞	HROIS
-#0003524	HROIS技术-朱晓亮	HROIS
-#00552601	HPBCS技术-庄小兰	HPBCS
-#01407391	HPBCS技术-韩仁龙	HPBCS
-#01197593	BVS技术-王明超	BVS
+01419699	OEM技术-周陈	{project:"OEM"}
+00594667	SOPPLAT技术-严惠	{project:"SOPPLAT"}
+01419699	DFGL技术-周陈	{project:"DFGL"}
+01188578	IOS技术-邳继武	{project:"IOS"}
+01025569	MEC技术-盖晓雅	{project:"MEC"}
+01025569	MKHL技术-盖晓雅	 {project:"MKHL"}
+00592038	CGSIS技术-李娣	{project:"CGSIS"}
+01437224	HROIS技术-王学骞	{project:"HROIS"}
+0003524	HROIS技术-朱晓亮	{project:"HROIS"}
+00552601	HPBCS技术-庄小兰	{project:"HPBCS"}
+01407391	HPBCS技术-韩仁龙	{project:"HPBCS"}
+01197593	BVS技术-王明超	{project:"BVS"}
 
-#01025913	HNM技术-程宏平	HNM
-#01431021	CEI技术-柳京活	CEI
-#a0015527	RDCXT技术-张继功	RDCXT
-#01431622	RDCXT技术-乔云龙 	RDCXT
-#01204349	KQXT技术-魏杰	KQXT
-#a0003302	YXHDAPP技术-于召和	YXHDAPP
-#00592140	YXHDAPP技术-杨璐嘉	YXHDAPP
-#01070548	YJQLCGL技术-张富伟	YJQLCGL
-#01405482	HBASE技术-魏鹏源	HBASE
-#01439687	COSMOWMS技术-王延磊	COSMOWMS
-#01440568	SVP技术-孙新伟	SVP
-#01070403	ZPTZJYKB技术-张玉丽	ZPTZJYKB
-#00594018	CQEMR技术-张小平	CQEMR
-#01467824	DIYUAS技术-刘雨濛	DIYUAS
-#A0010384	DIYUAS技术-荆汉娜	DIYUAS
-#01405482	OMS技术-魏鹏源	OMS
-#A0001627	OMS技术-陈浩	OMS
-#01462541	HMCENTER技术-姬哲	HMCENTER
-#A0020408	HMCENTER技术-安茂鑫	HMCENTER
+01025913	HNM技术-程宏平	{project:"HNM"}
+01431021	CEI技术-柳京活	{project:"CEI"}
+a0015527	RDCXT技术-张继功	{project:"RDCXT"}
+01431622	RDCXT技术-乔云龙 	{project:"RDCXT"}
+01204349	KQXT技术-魏杰	{project:"KQXT"}
+a0003302	YXHDAPP技术-于召和	{project:"YXHDAPP"}
+00592140	YXHDAPP技术-杨璐嘉	{project:"YXHDAPP"}
+01070548	YJQLCGL技术-张富伟	{project:"YJQLCGL"}
+01405482	HBASE技术-魏鹏源	{project:"HBASE"}
+01439687	COSMOWMS技术-王延磊	 {project:"COSMOWMS"}
+01440568	SVP技术-孙新伟	{project:"SVP"}
+01070403	ZPTZJYKB技术-张玉丽  {project:"ZPTZJYKB"}
+00594018	CQEMR技术-张小平	{project:"CQEMR"}
+01467824	DIYUAS技术-刘雨濛	{project:"DIYUAS"}
+A0010384	DIYUAS技术-荆汉娜	{project:"DIYUAS"}
+01405482	OMS技术-魏鹏源	{project:"OMS"}
+A0001627	OMS技术-陈浩	{project:"OMS"}
+01462541	HMCENTER技术-姬哲	{project:"HMCENTER"}
+A0020408	HMCENTER技术-安茂鑫	{project:"HMCENTER"}
