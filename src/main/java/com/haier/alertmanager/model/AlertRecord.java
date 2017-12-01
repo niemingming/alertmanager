@@ -102,6 +102,8 @@ public class AlertRecord {
             System.out.println("未找到告警信息的【lables】标识，无法初始化");
         }else {
             setLabels(labels);//使用所有的labels计算id
+            //labels中的monitor属性，只用于id计算，不在存储。
+            labels.remove("monitor");
             //提取字段
             String alertname = labels.remove("alertname") + "";
             setAlertname(alertname);

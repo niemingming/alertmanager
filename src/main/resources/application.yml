@@ -3,7 +3,7 @@ spring:
     name: alertmanager
   data:
     mongodb:
-      uri: mongodb://10.138.40.221:27018/alert
+      uri: mongodb://localhost:27017/alertmanager
       #mongodb://localhost:27017/alertmanager
       #mongodb://10.138.40.221:27018/alert
 server:
@@ -24,7 +24,7 @@ alertmanager:
   #ES主机和端口配置
   elasticsearch:
   #ES的主机端口配置，支持多台主机,
-    hostnames: ['10.138.16.188:9200','10.138.16.189:9200','10.138.16.190:9200']
+    hostnames: ['localhost:9200']
     #['10.138.16.188:9200','10.138.16.189:9200','10.138.16.190:9200']
     #['localhost:9200']
     #索引的时间格式
