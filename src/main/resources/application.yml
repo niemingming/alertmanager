@@ -39,10 +39,10 @@ alertmanager:
   notifyurl: http://10.138.16.192:8888/api/notify/message?async=1
   code:
     alertlevel:
-      error: 紧急
-      warn: 严重
-      info: 一般
-      debug: 提示
+      critical: 紧急
+      serious: 严重
+      warning: 一般
+      info: 提示
     #告警分类
     alertCategory:
       machine: 机器
