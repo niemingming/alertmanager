@@ -89,7 +89,9 @@ public class AlertRecord {
             if (annotations.get("value") != null&& annotations.get("value").isJsonPrimitive()){
                 value = annotations.get("value").getAsDouble();
                 //value做精度处理
-                value = new BigDecimal(value).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+                if (value != null) {
+                    value = new BigDecimal(value).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+                }
             }
         }
         Map labels = null;
