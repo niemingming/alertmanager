@@ -1,6 +1,8 @@
 #通知发送列表，分为3列，人员id，人员名称，匹配规则json字符串。一行对应一条通知规则，可以重复
 #01462834    薛冰  {alertname:"mymetric11",job:"tomcat"}
 #redis,mysql,MONITOR-DEV,MONITOR-PROD
+#01479820    聂明明 {alertname:"mymetric11"}
+01479820    聂明明 {project:"CSB"}
 01462834    薛冰  {project:"redis"}
 01462834    薛冰  {project:"mysql"}
 01462834    薛冰  {project:"MONITOR-DEV"}

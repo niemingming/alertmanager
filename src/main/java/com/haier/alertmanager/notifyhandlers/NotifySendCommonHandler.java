@@ -119,7 +119,8 @@ public class NotifySendCommonHandler implements INotifySendHanlder {
 
                 //构建参数
                 notifyParam param = new notifyParam();
-                param.subject = record.getProject() + "-" + record.getAlertname();
+                //修改标题格式为 互联互通-告警平台：
+                param.subject = "互联互通-告警平台:" + record.getProject() + "-" + alertConfigurationProp.alertType.get(record.getAlertname());
                 param.content = record.getMessage();
                 param.targets = targets;
                 param.id = record.getAlertId();

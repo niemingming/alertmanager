@@ -4,6 +4,8 @@ spring:
   data:
     mongodb:
       uri: mongodb://10.138.40.221:27018/alert
+      #mongodb://localhost:27017/alertmanager
+      #mongodb://10.138.40.221:27018/alert
 server:
   port: 8081
 #告警相关表明配置
@@ -23,6 +25,7 @@ alertmanager:
   elasticsearch:
   #ES的主机端口配置，支持多台主机,
     hostnames: ['10.138.16.188:9200','10.138.16.189:9200','10.138.16.190:9200']
+    #['10.138.16.188:9200','10.138.16.189:9200','10.138.16.190:9200']
     #['localhost:9200']
     #索引的时间格式
     datepattern: yyyyMM
@@ -46,6 +49,7 @@ alertmanager:
       app: 应用
     #告警类型
     alertType:
+      mymetric11: 测试告警
       cockpit_schedule_task_exit: 容器实例退出
       mysql_status_handlers_read_rnd: mysql索引不合理
       service_down: 服务不可用

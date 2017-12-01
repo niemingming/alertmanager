@@ -61,6 +61,8 @@ public class AlertDictionaryContainer {
     }
     /**
      * @description 根据告警名称获取要发送的告警信息，并指定是否附加告警原因分析
+     * 告警提示信息格式。
+     * 【level】系统：project 告警，描述：description 建议：suggest
      * @date 2017/11/16
      * @author Niemingming
      */
@@ -75,11 +77,16 @@ public class AlertDictionaryContainer {
         }
         //同时复制告警级别
         setAlertLevel(record,alertDictionary);
-        templateStr.append(alertDictionary.getDescription());
-        if (appedReason){
-            templateStr.append("\n").append(alertDictionary.getSuggest());
+        String levelStr = alertConfigurationProp.alertlevel.get(record.getLevel());
+        if (record.getEndsAt() > record.getStartsAt()){//如果告警恢复，就不直接传入恢复级别
+            levelStr = "恢复";
         }
-        System.out.println(new Date());
+        //拼装消息头
+        templateStr.append("【").append(levelStr).append("】 系统：").append(record.getProject()).append(" 告警，");
+        templateStr.append("描述：").append(alertDictionary.getDescription());
+        if (appedReason){
+            templateStr.append("\n建议：").append(alertDictionary.getSuggest());
+        }
         return simpleTemplate.decodeTemplate(templateStr.toString(),record.toMap());
     }
     /**
