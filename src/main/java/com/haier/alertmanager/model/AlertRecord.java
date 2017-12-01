@@ -109,7 +109,7 @@ public class AlertRecord {
             //labels中的monitor、severity、cluster属性，不用于id计算，不在存储。
             labels.remove("monitor");
             labels.remove("severity");
-            labels.remove("cluster属性");
+            labels.remove("cluster");
             setLabels(labels);//使用所有的labels计算id
             //提取字段
             String alertname = labels.remove("alertname") + "";
