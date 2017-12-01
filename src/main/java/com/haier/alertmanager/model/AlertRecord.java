@@ -9,6 +9,7 @@ import com.mongodb.DBObject;
 import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -87,6 +88,8 @@ public class AlertRecord {
             }
             if (annotations.get("value") != null&& annotations.get("value").isJsonPrimitive()){
                 value = annotations.get("value").getAsDouble();
+                //value做精度处理
+                value = new BigDecimal(value).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
             }
         }
         Map labels = null;
@@ -101,9 +104,11 @@ public class AlertRecord {
         if (labels == null){
             System.out.println("未找到告警信息的【lables】标识，无法初始化");
         }else {
-            setLabels(labels);//使用所有的labels计算id
-            //labels中的monitor属性，只用于id计算，不在存储。
+            //labels中的monitor、severity、cluster属性，不用于id计算，不在存储。
             labels.remove("monitor");
+            labels.remove("severity");
+            labels.remove("cluster属性");
+            setLabels(labels);//使用所有的labels计算id
             //提取字段
             String alertname = labels.remove("alertname") + "";
             setAlertname(alertname);
