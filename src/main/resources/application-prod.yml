@@ -53,9 +53,9 @@ alertmanager:
       node_fs_pct_high: 文件系统利用率过高
       node_tcp_conn_toomuch: TCP连接数过多
       node_disk_ioutil_pct_high: 磁盘io利用率过高
-      app_crash: 应用服务宕机
-      http_requests_delay_high: 应用服务访问响应慢
-      http_errors_rate_high: 应用服务错误率高
+      app_crash: 应用不可访问
+      http_requests_delay_high: 应用服务端访问响应慢
+      http_errors_rate_high: 应用服务端错误率高
       dubbo_requests_delay_high: dubbo服务响应慢
       dubbo_errors_rate_high: dubbo服务错误率高
 
