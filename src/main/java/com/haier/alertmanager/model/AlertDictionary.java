@@ -18,15 +18,18 @@ public class AlertDictionary {
     private String suggest;
     /*告警类型：机器、应用、中间件等*/
     private String alertCategory;
+    /*告警原因*/
+    private String reason;
 
     public AlertDictionary() {
     }
     public AlertDictionary(DBObject dict) {
         alertname = dict.get("alertname") + "";
-        alertlevel = dict.get("level")+"";
-        description = dict.get("description")+"";
-        suggest = dict.get("suggest")+"";
+        alertlevel = dict.get("level") +"";
+        description = dict.get("description") +"";
+        suggest = dict.get("suggest") == null? "" :dict.get("suggest") +"";
         alertCategory = dict.get("alertCategory")+"";
+        reason = dict.get("reason") == null ? "" : dict.get("reason")+"";
     }
 
     public String getAlertname() {
@@ -67,6 +70,14 @@ public class AlertDictionary {
 
     public void setAlertCategory(String alertCategory) {
         this.alertCategory = alertCategory;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     @Override

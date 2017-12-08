@@ -39,6 +39,10 @@ public class SimpleTemplate {
      * @author Niemingming
      */
     public String decodeTemplate(String source,Map values){
+        //处理空字符串
+        if (source == null ||"".equals(source) || "null".equals(source)){
+            return "";
+        }
         Set<String> keys = compileTemplate(source);
         for (String key : keys){
             String[] fields = key.substring(2,key.length()-1).split("\\.");

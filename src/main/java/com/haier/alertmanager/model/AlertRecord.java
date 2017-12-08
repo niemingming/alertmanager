@@ -60,6 +60,8 @@ public class AlertRecord {
     private Double value;
     /*度量单位*/
     private String unit;
+    /*告警原因*/
+    private String reason;
     /**
      * @description 空函数的初始化操作，用于该类的一些方法
      * @date 2017/11/16
@@ -164,6 +166,7 @@ public class AlertRecord {
         message = description +"\n" + suggest;
         value = record.get("value") == null ? null : (Double) record.removeField("value");
         unit = record.get("unit") == null ? null : record.get("unit")+"";
+        reason = record.get("reason") == null ? null : record.get("reason")+"";
         //形成labels字段，并计算id
         setLabels(record.get("labels") == null ? new HashMap() : (Map) record.get("labels"));
         id = mid;
@@ -260,6 +263,14 @@ public class AlertRecord {
 
     public void setValue(double value) {
         this.value = value;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public void setLabels(Map labels) {
@@ -384,6 +395,7 @@ public class AlertRecord {
         object.put("alertname",alertname);
         object.put("value",value);
         object.put("unit",unit);
+        object.put("reason",reason);
         object.put("labels",this.labels);
         return object;
     }

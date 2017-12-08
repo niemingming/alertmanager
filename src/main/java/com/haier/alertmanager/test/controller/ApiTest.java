@@ -11,7 +11,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * @description api服务调用测试
@@ -29,22 +31,23 @@ public class ApiTest {
 //        queryGroup();
 //        testgson();
 //        queryLevelCode();
-        queryCode("queryAlertLevels");
-        queryCode("queryAlertCategories");
-        queryCode("queryAlertTypes");
-        queryCode("queryAlertCode");
+//        queryCode("queryAlertLevels");
+//        queryCode("queryAlertCategories");
+//        queryCode("queryAlertTypes");
+//        queryCode("queryAlertCode");
+        sendPostNotify("http://10.138.16.192:8080/api/queryAlertingList","{pageinfo:{currentPage:1,pageSize:10}}");
     }
 
 
     public  static  void queryList() throws IOException {
         HttpClient client = HttpClients.createDefault();
-        HttpPost post = new HttpPost("http://localhost:8081/api/queryAlertingList");
+        HttpPost post = new HttpPost("http://10.138.16.192:8080/api/queryAlertingList");
         //不分页查询，列表查询为POST请求方式，条件为project=
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{")
                 .append("   pageinfo:{currentPage:1,pageSize:1},")
                 .append("  query:{")
-                .append(" \"project\":[\"project1\",\"project2\"],")
+//                .append(" \"project\":[\"project1\",\"project2\"],")
                 .append("   \"times\":{$gt:1}")
                 .append("  }")
                 .append("}");
@@ -136,5 +139,51 @@ public class ApiTest {
         Gson gson = new Gson();
         JsonArray list= gson.fromJson("[1,2,3]", JsonArray.class);
         System.out.println(list);
+    }
+
+    public static void sendPostNotify(String strURL, String params) {
+        System.out.println(strURL);
+        System.out.println(params);
+//        Response result=new Response();
+        try {
+            URL url = new URL(strURL);// 创建连接
+            HttpURLConnection connection = (HttpURLConnection) url
+                    .openConnection();
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setUseCaches(false);
+            connection.setInstanceFollowRedirects(true);
+            connection.setRequestMethod("POST"); // 设置请求方式
+            connection.setRequestProperty("Accept", "application/json"); // 设置接收数据的格式
+            connection.setRequestProperty("Content-Type", "application/json"); // 设置发送数据的格式
+            connection.connect();
+            OutputStreamWriter out = new OutputStreamWriter(
+                    connection.getOutputStream(), "UTF-8"); // utf-8编码
+            out.append(params);
+            out.flush();
+            out.close();
+            // 读取响应
+            int length = (int) connection.getContentLength();// 获取长度
+            InputStream is = connection.getInputStream();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] temp = new byte[1024];
+            int readLen = 0;
+            int destPos = 0;
+            while ((readLen = is.read(temp)) > 0) {
+//                System.arraycopy(temp, 0, data, destPos, readLen);
+//                destPos += readLen;
+                bos.write(temp,0,readLen);
+            }
+//                result=result.ok(new String(data, "UTF-8"));
+            System.out.println(new String(bos.toByteArray()));
+            if (length != -1) {
+            }
+        } catch (IOException e) {
+//            log.error("【NotifyServiceImpl.sendPostNotify】调用方法报错"+e);
+//            result=result.fail(Constant.CODE_ONE, "查询告警信息失败！");
+//            return result;
+        }
+//        return result;
+
     }
 }

@@ -78,6 +78,7 @@ public class AlertRecordContainer {
             record1.setSuggest(tmp.getSuggest());
             record1.setDescription(tmp.getDescription());
             record1.setAlertCategory(tmp.getAlertCategory());
+            record1.setReason(tmp.getReason());
             record1.setUnit(tmp.getUnit());
         }else {//数据库中没有的时候，先初始化提示信息
             String message = alertDictionaryContainer.getNotifyMessage(record1);

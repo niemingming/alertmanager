@@ -85,7 +85,13 @@ public class AlertDictionaryContainer {
         templateStr.append("【").append(levelStr).append("】 系统：").append(record.getProject()).append(" 告警，");
         templateStr.append("描述：").append(alertDictionary.getDescription());
         if (appedReason){
-            templateStr.append("\n建议：").append(alertDictionary.getSuggest());
+            //判断原因和建议是否为空
+            if (alertDictionary.getReason() != null && !"".equals(alertDictionary.getReason())){
+                templateStr.append("\n原因：").append(alertDictionary.getReason());
+            }
+            if (alertDictionary.getSuggest() != null && !"".equals(alertDictionary.getSuggest())) {
+                templateStr.append("\n建议：").append(alertDictionary.getSuggest());
+            }
         }
         return simpleTemplate.decodeTemplate(templateStr.toString(),record.toMap());
     }
@@ -102,6 +108,8 @@ public class AlertDictionaryContainer {
         record.setDescription(simpleTemplate.decodeTemplate(alertDictionary.getDescription(),record.toMap()));
         //获取告警建议
         record.setSuggest(simpleTemplate.decodeTemplate(alertDictionary.getSuggest(),record.toMap()));
+        //获取告警原因
+        record.setReason(simpleTemplate.decodeTemplate(alertDictionary.getReason(),record.toMap()));
 
     }
 
