@@ -45,6 +45,20 @@ alertmanager:
       app: 应用
     #告警类型
     alertType:
+      host_service_down: 机器监控数据无法获取
+      host_reboot: 机器重启
+      host_cpu_pct_high: CPU利用率过高
+      host_mem_pct_high: 内存利用率过高
+      host_mem_available_low: 机器内存剩余量不足
+      host_fs_pct_high: 文件系统利用率过高
+      host_tcp_conn_toomuch: TCP连接数过多
+      host_disk_ioutil_pct_high: 磁盘io利用率过高
+      app_crash: 应用服务宕机
+      http_requests_delay_high: 应用服务访问响应慢
+      http_errors_rate_high: 应用服务错误率高
+      dubbo_requests_delay_high: dubbo服务响应慢
+      dubbo_errors_rate_high: dubbo服务错误率高
+    alertType1:
       cockpit_schedule_task_exit: 容器实例退出
       mysql_status_handlers_read_rnd: mysql索引不合理
       service_down: 服务不可用
