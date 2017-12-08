@@ -50,15 +50,15 @@ alertmanager:
     #告警类型
     alertType:
       node_service_down: 机器监控数据无法获取
-        node_reboot: 机器重启
-        node_cpu_pct_high: CPU利用率过高
-        node_mem_pct_high: 内存利用率过高
-        node_mem_available_low: 机器内存剩余量不足
-        node_fs_pct_high: 文件系统利用率过高
-        node_tcp_conn_toomuch: TCP连接数过多
-        node_disk_ioutil_pct_high: 磁盘io利用率过高
-        app_crash: 应用服务宕机
-        http_requests_delay_high: 应用服务访问响应慢
-        http_errors_rate_high: 应用服务错误率高
-        dubbo_requests_delay_high: dubbo服务响应慢
-        dubbo_errors_rate_high: dubbo服务错误率高
+      node_reboot: 机器重启
+      node_cpu_pct_high: CPU利用率过高
+      node_mem_pct_high: 内存利用率过高
+      node_mem_available_low: 机器内存剩余量不足
+      node_fs_pct_high: 文件系统利用率过高
+      node_tcp_conn_toomuch: TCP连接数过多
+      node_disk_ioutil_pct_high: 磁盘io利用率过高
+      app_crash: 应用不可访问
+      http_requests_delay_high: 应用服务端访问响应慢
+      http_errors_rate_high: 应用服务端错误率高
+      dubbo_requests_delay_high: dubbo服务响应慢
+      dubbo_errors_rate_high: dubbo服务错误率高
