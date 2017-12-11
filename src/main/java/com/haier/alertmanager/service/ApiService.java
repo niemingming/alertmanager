@@ -119,6 +119,8 @@ public class ApiService {
                 writeOutData(response,result);
                 return;
             }
+            //增加级别的非空查询
+            qcon.put("level",new BasicDBObject("$ne","null"));
             //按照告警开始时间倒序
             DBObject sort = new BasicDBObject("startsAt",-1);
             long total = 0l;

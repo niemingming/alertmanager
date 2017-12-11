@@ -3,7 +3,7 @@ spring:
     name: alertmanager
   data:
     mongodb:
-      uri: mongodb://localhost:27017/alertmanager
+      uri: mongodb://10.138.40.221:27018/alert
       #mongodb://localhost:27017/alertmanager
       #mongodb://10.138.40.221:27018/alert
 server:
