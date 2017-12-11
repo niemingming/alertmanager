@@ -41,14 +41,17 @@ public class AlertDictionaryContainer {
     @PostConstruct
     public void init(){
         Map alertDictionaryMap = new HashMap<String, AlertDictionary>();
+        Map<String,String> projects = new HashMap<String, String>();
         //从表中读取所有数据字典
         DBCursor cursor = mongoTemplate.getCollection(alertConfigurationProp.alertDictionaryTableName).find();
         while (cursor.hasNext()){
             DBObject dict = cursor.next();
             AlertDictionary dictionary = new AlertDictionary(dict);
             alertDictionaryMap.put(dictionary.getAlertname(),dictionary);
+            projects.put(dictionary.getAlertname(),dictionary.getAlertType());
         }
         this.alertDictionaryMap = alertDictionaryMap;
+        alertConfigurationProp.alertType = projects;
     }
 
     /**

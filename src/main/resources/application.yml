@@ -3,7 +3,7 @@ spring:
     name: alertmanager
   data:
     mongodb:
-      uri: mongodb://localhost:27017/alertmanager
+      uri: mongodb://10.138.40.221:27018/alert
       #mongodb://localhost:27017/alertmanager
       #mongodb://10.138.40.221:27018/alert
 server:
@@ -47,7 +47,7 @@ alertmanager:
     alertCategory:
       machine: 机器
       app: 应用
-    #告警类型
+    #告警类型，改为从库中获取
     alertType:
       node_service_down: 机器监控数据无法获取
       node_reboot: 机器重启

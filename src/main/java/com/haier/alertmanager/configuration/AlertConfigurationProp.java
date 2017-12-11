@@ -60,7 +60,6 @@ public class AlertConfigurationProp {
         this.esTemplateAddress = elasticsearchConfiguration.getTemplate();
         this.alertlevel = alertManagerCode.getAlertlevel();
         this.alertCategory = alertManagerCode.getAlertCategory();
-        this.alertType = alertManagerCode.getAlertType();
     }
 
 }

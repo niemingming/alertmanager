@@ -20,6 +20,8 @@ public class AlertDictionary {
     private String alertCategory;
     /*告警原因*/
     private String reason;
+    /*告警类型*/
+    private String alertType;
 
     public AlertDictionary() {
     }
@@ -30,6 +32,7 @@ public class AlertDictionary {
         suggest = dict.get("suggest") == null? "" :dict.get("suggest") +"";
         alertCategory = dict.get("alertCategory")+"";
         reason = dict.get("reason") == null ? "" : dict.get("reason")+"";
+        alertType = dict.get("alertType") == null ? "" : dict.get("alertType")+"";
     }
 
     public String getAlertname() {
@@ -78,6 +81,14 @@ public class AlertDictionary {
 
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    public String getAlertType() {
+        return alertType;
+    }
+
+    public void setAlertType(String alertType) {
+        this.alertType = alertType;
     }
 
     @Override

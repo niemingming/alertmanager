@@ -723,8 +723,11 @@ public class ApiService {
     @ResponseBody
     @RequestMapping("/queryAlertTypes")
     public void queryAlertTypes(HttpServletResponse response){
+        //改为从数据库中读取
         writeCodeResult(alertConfigurationProp.alertType,response);
+
     }
+
 
     /**
      * @description 查询告警所有公共编码
