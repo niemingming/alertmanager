@@ -121,7 +121,7 @@ public class ApiService {
             }
             //增加级别的非空查询
             if (qcon.get("level") == null) {//如果没有传入级别条件
-                qcon.put("level",new BasicDBObject("$ne","null"));
+                qcon.put("level",new BasicDBObject("$nin",new Object[]{null,"null"}));
             }
             //按照告警开始时间倒序
             DBObject sort = new BasicDBObject("startsAt",-1);
