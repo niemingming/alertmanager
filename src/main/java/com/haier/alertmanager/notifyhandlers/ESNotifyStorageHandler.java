@@ -14,6 +14,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -81,6 +82,12 @@ public class ESNotifyStorageHandler implements INotifyStorageHandler {
             restClient.performRequestAsync("PUT",endpoint,params,queryBody,new EsResponseLisnter(record,index,id,dateformat));
         } catch (Exception e) {
             e.printStackTrace();
+        }finally{
+            try {
+                restClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         //错误信息存在日志文件中，我们需要删除记录
         mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).remove(record.toQuerySqlById());
