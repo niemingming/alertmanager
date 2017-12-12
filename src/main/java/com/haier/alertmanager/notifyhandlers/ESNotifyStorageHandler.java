@@ -79,14 +79,16 @@ public class ESNotifyStorageHandler implements INotifyStorageHandler {
         StringEntity queryBody = new StringEntity(body,"UTF-8");
         queryBody.setContentType("application/json;charset=UTF-8");
         try {
-            restClient.performRequestAsync("PUT",endpoint,params,queryBody,new EsResponseLisnter(record,index,id,dateformat));
+            restClient.performRequestAsync("PUT",endpoint,params,queryBody,new EsResponseLisnter(record,index,id,dateformat,restClient));
         } catch (Exception e) {
+            //抛出异常关闭连接
             e.printStackTrace();
-        }finally{
-            try {
-                restClient.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (restClient != null) {
+                try {
+                    restClient.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         }
         //错误信息存在日志文件中，我们需要删除记录
@@ -104,11 +106,13 @@ public class ESNotifyStorageHandler implements INotifyStorageHandler {
         private String index;
         private String id;
         private String dateformat;
-        public EsResponseLisnter(AlertRecord record,String index,String id,String dateformat){
+        private RestClient restClient;
+        public EsResponseLisnter(AlertRecord record, String index, String id, String dateformat, RestClient restClient){
             this.record = record;
             this.index = index;
             this.id = id;
             this.dateformat = dateformat;
+            this.restClient = restClient;
         }
 
         @Override
@@ -121,6 +125,13 @@ public class ESNotifyStorageHandler implements INotifyStorageHandler {
                 System.out.println(record.toString());
                 logService.writeLog(record,index,id,dateformat + ".log");
             }
+            if (restClient != null) {
+                try {
+                    restClient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         @Override
@@ -129,6 +140,13 @@ public class ESNotifyStorageHandler implements INotifyStorageHandler {
             System.out.println(record);
             e.printStackTrace();
             logService.writeLog(record,index,id,dateformat + ".log");
+            if (restClient != null) {
+                try {
+                    restClient.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 
