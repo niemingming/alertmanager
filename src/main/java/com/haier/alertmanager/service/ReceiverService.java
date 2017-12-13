@@ -46,6 +46,8 @@ public class ReceiverService {
         while((string = bufferedReader.readLine()) != null){
             alerts.append(string);
         }
+        //打印请求体2017-12-13
+//        System.out.println(alerts);
         //如果没有传入数据，我们返回状态信息
         if(!"".equals(alerts.toString())){
             //将告警信息转成json数据，并处理告警记录

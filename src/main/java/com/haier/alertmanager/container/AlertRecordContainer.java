@@ -62,7 +62,8 @@ public class AlertRecordContainer {
         AlertRecord record1 = new AlertRecord(record);
         DBObject object = mongoTemplate.getCollection(alertConfigurationProp.alertRecordTalbeName).findOne(record1.toQuerySqlById());
         boolean shouldexec = true;
-        if (record1.getEndsAt() > record1.getStartsAt()){
+        //结束时间和1970年比较，如果比1970年晚，认为是已经结束了，否则未结束。
+        if (record1.getEndsAt() > 0){
             //如果有结束时间，则设置状态为已解决
             record1.setStatus(AlertConstVariable.ALERT_STATUS_RESLOVE);
             //如果数据库中有记录，表示第一次接收到消除请求，需要更新，且删除记录；否则表示已经处理过，后续不在处理。
