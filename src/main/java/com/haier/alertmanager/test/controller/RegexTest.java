@@ -6,10 +6,10 @@ import java.util.regex.Pattern;
 public class RegexTest {
 
     public static void main(String[] args){
-        String pp = "fw*";
-        pp = pp.replace("*","\\w*");
+        String pp = "*";
+        pp = pp.replace("*","[\\w\\-]*");
         Pattern p = Pattern.compile( pp);
-        String str = "fooos";
+        String str = "ab-cd";
         Matcher m = p.matcher(str);
         System.out.println(m.matches());
     }
