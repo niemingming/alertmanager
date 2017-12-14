@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @description 信息接收人实体
@@ -55,7 +56,19 @@ public class MessageReceiverInfo {
         //计算id
         List<String> algfields = new ArrayList<String>();
         for (String field : filters.keySet()){
-            algfields.add(field+"="+data.get(field));
+            //修改匹配规则，适用于正则表达式，支持name*号匹配
+            String value = filters.get(field).toString();
+            if (value.charAt(value.length() - 1) == '*'){
+                Pattern pattern = Pattern.compile(value.replace("*","\\w*"));
+                String dv = data.get(field) + "";
+                if (pattern.matcher(dv).matches()){//全字符匹配，直接使用判断值。
+                    algfields.add(field+"="+filters.get(field));
+                }else {
+                    algfields.add(field+"="+data.get(field));
+                }
+            }else {
+                algfields.add(field+"="+data.get(field));
+            }
         }
         try {
             MessageDigest digest = MessageDigest.getInstance(AlertConstVariable.ALERT_ID_ALG);
