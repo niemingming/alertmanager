@@ -2,6 +2,7 @@ package com.haier.alertmanager.test.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -45,8 +46,13 @@ public class ESQueryTest {
          * }
          */
         Map query = new HashMap();
+        //构造查询条件
+        Map multi = new HashMap();
+        multi.put("query_string",new BasicDBObject("query","httpminotor").toMap());
+//        multi.put("fields","_all");
         Map bool = new HashMap();
 
+//        query.put("multi_match",multi);
         query.put("bool",bool);
         List must = new ArrayList();
         bool.put("must",must);
@@ -59,11 +65,12 @@ public class ESQueryTest {
         bool.put("filter",filter);
         Map range = new HashMap();
         filter.add(range);
+        filter.add(multi);
         Map times = new HashMap();
         range.put("range",times);
         Map time = new HashMap();
         times.put("times",time);
-        time.put("gte",10);
+        time.put("gte",25);
         Map term = new HashMap();
         filter.add(term);
         Map monitor = new HashMap();
@@ -72,7 +79,9 @@ public class ESQueryTest {
         Map con = new HashMap();
         con.put("query",query);
         con.put("from",0);
-        con.put("size",1);
+        con.put("size",10);
+
+//        query.put("term",monitor);
         Gson gson = new Gson();
         System.out.println(gson.toJson(con));
         StringEntity se = new StringEntity(gson.toJson(con));

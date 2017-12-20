@@ -311,6 +311,7 @@ public class ApiService {
         //调用结果信息
         ApiResult result = new ApiResult();
         Gson gson = new Gson();
+        RestClient client = getRestClient();
         try {
             //读取请求体中的查询条件。
             BufferedReader reader = request.getReader();
@@ -320,39 +321,57 @@ public class ApiService {
             }
             //创建ES查询对象
             EsQueryObject esQueryObject = new EsQueryObject();
-            JsonObject page = null;
-            JsonObject filter = new JsonObject();
-            //获取分页条件和过滤条件
-            long currentPage = 0;
-            if (!"".equals(queryCon.toString())) {
-                JsonObject query = gson.fromJson(queryCon.toString().replace("$",""), JsonObject.class);
-                page = query.get("pageinfo") == null ? null : (JsonObject) query.get("pageinfo");
-                filter = query.get("query") == null ? new JsonObject() : (JsonObject) query.get("query");
-            }
-            if (page != null){//带有分页条件时，设置分页数据
-                long size = page.get("pageSize") == null ? 10000: page.get("pageSize").getAsLong();
-                currentPage = page.get("currentPage") == null ? 0 : page.get("currentPage").getAsLong();
-                long from = (currentPage-1)*size;
-                esQueryObject.setFrom(from);
-                esQueryObject.setSize(size);
-            }
-            //添加查询条件
-            esQueryObject.addQueryCondition(filter);
+            dealWithHistoryCon(result,esQueryObject,queryCon.toString());
+
             //这里采用同步请求方法
-            RestClient client = getRestClient();
+
             StringEntity queryBody = new StringEntity(gson.toJson(esQueryObject),"UTF-8");
             queryBody.setContentType("application/json;charset=UTF-8");
             Header header = new BasicHeader("content-type","application/json");
             //请求ES查询历史数据
             Response queryResult = client.performRequest("POST","/alert-*/_search",new HashMap<String,String>(),queryBody,header);
-            result.setCurrentPage(currentPage);
+
             dealWithHistoryList(result,queryResult);
         }catch (Exception e){
             e.printStackTrace();
             result.setMsg("查询历史数据出现异常！");
+        }finally {
+            try {
+                client.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         writeOutData(response,result);
     }
+    /**
+     * @description 处理历史数据的查询条件
+     * @date 2017/12/20
+     * @author Niemingming
+     */
+    private void dealWithHistoryCon(ApiResult result, EsQueryObject esQueryObject, String qconCon) {
+        JsonObject page = null;
+        JsonObject filter = new JsonObject();
+        Gson gson = new Gson();
+        //获取分页条件和过滤条件
+        long currentPage = 0;
+        if (!"".equals(qconCon)&&qconCon != null) {
+            JsonObject query = gson.fromJson(qconCon.replace("$",""), JsonObject.class);
+            page = query.get("pageinfo") == null ? null : (JsonObject) query.get("pageinfo");
+            filter = query.get("query") == null ? new JsonObject() : (JsonObject) query.get("query");
+        }
+        if (page != null){//带有分页条件时，设置分页数据
+            long size = page.get("pageSize") == null ? 10000: page.get("pageSize").getAsLong();
+            currentPage = page.get("currentPage") == null ? 0 : page.get("currentPage").getAsLong();
+            long from = (currentPage-1)*size;
+            esQueryObject.setFrom(from);
+            esQueryObject.setSize(size);
+        }
+        //添加查询条件
+        esQueryObject.addQueryCondition(filter);
+        result.setCurrentPage(currentPage);
+    }
+
     /**
      * @description 根据index和id查询历史详情
      * GET /api/queryHistoryById/{index}/{id}
@@ -397,6 +416,12 @@ public class ApiService {
         } catch (IOException e) {
             e.printStackTrace();
             result.setMsg("查询历史数据出现异常！");
+        }finally {
+            try {
+                restClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         writeOutData(response,result);
     }
@@ -417,24 +442,34 @@ public class ApiService {
      */
     @ResponseBody
     @RequestMapping("/searchHistoryList/{searchstr}")
-    public void searchHistoryList(@PathVariable String searchstr,@RequestParam(value = "currentPage",defaultValue = "1") int currentPage,
-                                  @RequestParam(value = "pageSize",defaultValue = "10") int pageSize, HttpServletResponse response) {
-        int from = (currentPage - 1)*pageSize ;
-        int size = pageSize;
+    public void searchHistoryList(@PathVariable String searchstr,@RequestBody String con, HttpServletResponse response) {
+        Gson gson = new Gson();
         //按照结束时间倒序排列
-        String endpoint = "/alert-*/_search?q=" + searchstr + "&sort=endsAt:desc&from=" + from + "&size=" + size;
+        String endpoint = "/alert-*/_search";
         RestClient restClient = getRestClient();
         //创建返回结果信息对象
         ApiResult result = new ApiResult();
+        EsQueryObject esQueryObject = new EsQueryObject();
+        dealWithHistoryCon(result,esQueryObject,con);
+        //增加查询条件{query_string:{query:searchstr}}
+        List filter = (List) ((Map)esQueryObject.query.get("bool")).get("filter");
+        filter.add(new BasicDBObject("query_string",new BasicDBObject("query",searchstr)).toMap());
+        System.out.println(gson.toJson(esQueryObject));
+        StringEntity queryBody = new StringEntity(gson.toJson(esQueryObject),"UTF-8");
         //根据id从ES中查询告警详情
         Header header = new BasicHeader("content-type","application/json");
         try {
-            Response queryResult = restClient.performRequest("GET",endpoint,header);
-            result.setCurrentPage(currentPage);
+            Response queryResult = restClient.performRequest("GET",endpoint,new HashMap<String, String>(),queryBody,header);
             dealWithHistoryList(result,queryResult);
         } catch (IOException e) {
             e.printStackTrace();
             result.setMsg("查询历史数据出现异常！");
+        }finally {
+            try {
+                restClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         //输出返回结果
         writeOutData(response,result);

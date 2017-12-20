@@ -27,7 +27,7 @@ public class ApiTest {
 //        queryById();
 //        queryHistoryList();
 //        queryHistoryById();
-//        searchHistoryList();
+        searchHistoryList();
 //        queryGroup();
 //        testgson();
 //        queryLevelCode();
@@ -35,7 +35,7 @@ public class ApiTest {
 //        queryCode("queryAlertCategories");
 //        queryCode("queryAlertTypes");
 //        queryCode("queryAlertCode");
-        sendPostNotify("http://10.138.16.192:8080/api/queryAlertingList","{pageinfo:{currentPage:1,pageSize:10}}");
+//        sendPostNotify("http://10.138.16.192:8080/api/queryAlertingList","{pageinfo:{currentPage:1,pageSize:10}}");
     }
 
 
@@ -75,7 +75,7 @@ public class ApiTest {
                 .append("   pageinfo:{currentPage:1,pageSize:2},")
                 .append("  query:{")
                 .append("  \"project\":[\"project1\",\"project2\"],")
-                .append("   times:{$gt:10}")
+                .append("   times:{$gt:100}")
                 .append("  }")
                 .append("}");
         StringEntity stringEntity = new StringEntity(stringBuilder.toString(),"UTF-8");
@@ -95,8 +95,19 @@ public class ApiTest {
 
     public static void  searchHistoryList() throws IOException {
         HttpClient client = HttpClients.createDefault();
-        HttpGet get = new HttpGet("http://localhost:8081/api/searchHistoryList/tomcat");
-        HttpResponse response = client.execute(get);
+        HttpPost post = new HttpPost("http://localhost:8081/api/searchHistoryList/my1");
+        //不分页查询，列表查询为POST请求方式，条件为project=
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{")
+                .append("   pageinfo:{currentPage:1,pageSize:2},")
+                .append("  query:{")
+                .append("  \"project\":[\"project1\",\"project2\"],")
+                .append("   times:{$gte:10}")
+                .append("  }")
+                .append("}");
+        StringEntity stringEntity = new StringEntity(stringBuilder.toString(),"UTF-8");
+        post.setEntity(stringEntity);
+        HttpResponse response = client.execute(post);
         HttpEntity res = response.getEntity();
         System.out.println(EntityUtils.toString(res));
     }
